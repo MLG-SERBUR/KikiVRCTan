@@ -67,19 +67,30 @@ catch (PlatformNotSupportedException)
 // ---------- 2. Renderer scenarios ----------
 Directory.CreateDirectory("test-output");
 
-void Render(string name, FeedPipeState state)
+byte[] Render(string name, FeedPipeState state, int minBytes = 1000)
 {
     var png = FeedRenderer.DrawFeedOnCanvas(state);
     File.WriteAllBytes(Path.Combine("test-output", name + ".png"), png);
     using var ms = new MemoryStream(png);
     using var bmp = SkiaSharp.SKBitmap.Decode(ms);
     Console.WriteLine($"RENDER {name}: {bmp.Width}x{bmp.Height} ({png.Length} bytes)");
-    Check(png.Length > 1000, $"render {name}: non-trivial output");
+    Check(png.Length > minBytes, $"render {name}: non-trivial output");
+    return png;
 }
 
 var baseConfig = new FeedPipeConfig { MaxEntries = 6, FontSize = 64, Opacity = 85, Anchor = 0, WidthCm = 90, ShowTimestamps = true, DesktopOverlay = true };
 
-Render("empty", new FeedPipeState { Counter = 1, Config = baseConfig, Entries = [] });
+var emptyPng = Render("empty", new FeedPipeState { Counter = 1, Config = baseConfig, Entries = [] }, minBytes: 0);
+// FORK: an empty feed renders fully transparent — no placeholder box.
+{
+    using var ms = new MemoryStream(emptyPng);
+    using var bmp = SkiaSharp.SKBitmap.Decode(ms);
+    bool transparent = true;
+    for (int x = 0; x < bmp.Width && transparent; x += 137)
+        for (int y = 0; y < bmp.Height && transparent; y += 53)
+            if (bmp.GetPixel(x, y).Alpha != 0) transparent = false;
+    Check(transparent, "render empty: fully transparent, no placeholder");
+}
 
 Render("mixed", new FeedPipeState
 {

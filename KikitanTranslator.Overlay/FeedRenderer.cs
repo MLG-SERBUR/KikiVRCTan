@@ -174,8 +174,20 @@ internal static class FeedRenderer
             }
         }
 
+        // FORK: no placeholder. An empty feed renders fully transparent, so
+        // the overlay shows nothing until the first message arrives — never
+        // a "Waiting for speech…" box at startup or before anything is
+        // enabled. (A 1x1 image would divide by zero in Form1's scaler, so
+        // this keeps the normal canvas size, just blank.)
         if (lines.Count == 0)
-            lines.Add(new FeedLine { Body = "Waiting for speech…", Color = new SKColor(0x88, 0x88, 0x88), FirstOfEntry = true });
+        {
+            var blankInfo = new SKImageInfo(canvasWidth, 240, SKColorType.Rgba8888, SKAlphaType.Premul);
+            using var blankSurface = SKSurface.Create(blankInfo);
+            blankSurface.Canvas.Clear(SKColors.Transparent);
+            using var blankImage = blankSurface.Snapshot();
+            using var blankData = blankImage.Encode(SKEncodedImageFormat.Png, 100);
+            return blankData.ToArray();
+        }
 
         float TotalHeight()
         {

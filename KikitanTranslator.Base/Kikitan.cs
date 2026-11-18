@@ -237,8 +237,9 @@ public class Kikitan : IDisposable
                 Log.Debug($"[KKTN] Processing delayed output: desktop={_isLoopback}, remaining={_queue.Count}, sourceChars={texts[0].Length}, translationChars={texts[1].Length}");
             
                 foreach (var output in _outputs.Where(v => v.IsDelayed())) output.Send(texts[0], texts[1], true);
-                // FORK: no artificial per-char delay; send ASAP. Typing indicator
-                // is handled by the Chatbox output itself.
+                // FORK: no artificial per-char delay; send ASAP. Typing
+                // indicator is keystrokes-only (Send box via SetTyping);
+                // speech output does not touch it.
             }
         }
     }

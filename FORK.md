@@ -28,7 +28,8 @@ and a native Windows UI, without touching the speech/translation backend.
   upstream), plus a live feed list. The Send text box translates typed text
   directly: no Start needed (standalone translation in `AppEngine` when the
   mic pipeline isn't running), and typing in it shows the VRChat typing
-  indicator, cleared 5s after the last keystroke or on send.
+  indicator, cleared 5s after the last keystroke or on send. The indicator
+  is keystrokes-only — speech output never sends it.
 - `Languages.cs` — generated from upstream
   `KikitanTranslator.Photino/UserInterface/src/util/constants.ts`.
 - `OscWatcher.cs` — copied from upstream Photino (mute detection), namespace
@@ -55,7 +56,8 @@ and a native Windows UI, without touching the speech/translation backend.
   Font size is fixed from config; **the box grows with content** (up to a cap,
   oldest lines trimmed) instead of shrinking text. Desktop entries render
   light-blue, mic entries white; overlay messages carry no timestamp
-  (the log feed still shows them).
+  (the log feed still shows them). An empty feed renders fully transparent —
+  no "Waiting for speech…" placeholder.
 - `OverlayServer.cs` — `StartFeedReader` poll loop; `SendFeed` routes rendered
   feed frames to the desktop form / VR overlay.
 - `OpenVROverlay.cs` — anchor presets (HMD / left hand / right hand, with HMD

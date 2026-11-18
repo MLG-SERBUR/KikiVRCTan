@@ -16,7 +16,11 @@ public class Chatbox : IOutput
     {
         try
         {
-            OscChatbox.SetIsTyping(!final);
+            // FORK: no typing indicator here. Speech output used to set it
+            // on every interim/final, so it kept re-appearing after a typed
+            // send (and stuck on if translation failed and no final ever
+            // queued). Typing is keystrokes-only now: MainForm drives it via
+            // SetTyping while composing in the Send box.
             if (!final && !AppConfig.ConfigObject.SendWithoutWaitingForFinish) return;
             
             if (AppConfig.ConfigObject.SpeechToTextOnly) OscChatbox.SendMessage(recognized, true);
