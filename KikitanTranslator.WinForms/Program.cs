@@ -10,6 +10,12 @@ static class Program
     [STAThread]
     static void Main()
     {
+        // FORK: one instance only. Two hosts would both send OSC (double
+        // chatbox messages, double typing indicator) and both drive the
+        // feed/overlay.
+        using var singleInstance = new Mutex(true, "KikiVRCTan-single-instance", out bool createdNew);
+        if (!createdNew) return;
+
         Console.OutputEncoding = System.Text.Encoding.UTF8;
 
         // FORK: keep config.json and logs next to the executable, not %APPDATA%.

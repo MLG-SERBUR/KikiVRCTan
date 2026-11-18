@@ -20,6 +20,8 @@ public sealed class MainForm : Form
     // control: it survives RebuildForUiScale (which disposes the form's
     // controls when the UI scale changes).
     private readonly System.Windows.Forms.Timer _typingTimer = new() { Interval = 5000 };
+    // FORK: one-shot re-clear 1s after a send, once the message has landed.
+    private readonly System.Windows.Forms.Timer _sendClearTimer = new() { Interval = 1000 };
     private int _feedLineCount;
     private Button _updateButton = null!;
     private Updater _updater = null!;
@@ -41,8 +43,12 @@ public sealed class MainForm : Form
         _engine = engine;
         _cfg = AppConfig.ConfigObject;
 
-        Text = "KikiVRCTan"; // FORK (feed-overlay): product name
+        // FORK: version in the title bar (short SHA from version.txt), so a
+        // stale build is visible at a glance instead of guessed at.
+        var version = Updater.LocalVersion();
+        Text = version is { Length: >= 7 } and not "unknown" ? $"KikiVRCTan ({version[..7]})" : "KikiVRCTan";
         _typingTimer.Tick += (_, _) => StopTypingIndicator();
+        _sendClearTimer.Tick += (_, _) => ResendTypingFalse();
         RebuildForUiScale();
     }
 
@@ -131,10 +137,14 @@ public sealed class MainForm : Form
             _manualBox = new TextBox { Width = S(280) };
             _manualBox.KeyDown += (_, e) =>
             {
-                if (e.KeyCode == Keys.Enter) { e.SuppressKeyPress = true; SendManualText(); }
+                if (e.KeyCode == Keys.Enter) { e.SuppressKeyPress = true; SendManualText(); return; }
+                // FORK: typing indicator fires on character keystrokes only.
+                if (IsTypingKey(e)) OnManualBoxTyped();
             };
-            // FORK: typing indicator while composing (see OnManualBoxTyped).
-            _manualBox.TextChanged += (_, _) => OnManualBoxTyped();
+            // FORK: TextChanged only clears when the box becomes empty
+            // (backspace / cut / Clear). Backspace, Delete, arrows, Enter
+            // and other non-character keys never send the indicator.
+            _manualBox.TextChanged += (_, _) => { if (_manualBox.Text.Length == 0) StopTypingIndicator(); };
             var send = new Button { Text = "Send", Width = S(90), Height = S(28) };
             send.Click += (_, _) => SendManualText();
             c.Controls.Add(_manualBox);
@@ -463,17 +473,46 @@ public sealed class MainForm : Form
         _engine.ManualTranslate(text);
         _manualBox.Clear();
         _manualBox.Focus();
+        // FORK: re-clear 1s later, once the message has landed, in case
+        // VRChat re-showed the indicator on message arrival.
+        _sendClearTimer.Stop();
+        _sendClearTimer.Start();
     }
 
-    // FORK: typing indicator while composing in the Send box. True on every
-    // keystroke; the 5s idle timer clears it when typing stops, so VRChat
-    // never shows a stuck indicator. Works without Start (plain OSC).
+    // FORK: typing indicator while composing in the Send box. True on
+    // character keystrokes only (see IsTypingKey); the 5s idle timer clears
+    // it when typing stops, so VRChat never shows a stuck indicator. Works
+    // without Start (plain OSC).
     private void OnManualBoxTyped()
     {
-        if (_manualBox.Text.Length == 0) { StopTypingIndicator(); return; }
         _engine.SetTyping(true);
         _typingTimer.Stop();
         _typingTimer.Start();
+    }
+
+    private static bool IsTypingKey(KeyEventArgs e)
+    {
+        // FORK: only keys that insert a character count as typing. Backspace,
+        // Delete, arrows, Enter, Tab, function keys and the like never send
+        // the indicator. Ctrl+V pastes text in, so it counts.
+        if (e.Alt) return false;
+        if (e.Control) return e.KeyCode == Keys.V;
+        var k = e.KeyCode;
+        if (k is >= Keys.A and <= Keys.Z) return true;
+        if (k is >= Keys.D0 and <= Keys.D9) return true;
+        if (k is >= Keys.NumPad0 and <= Keys.NumPad9) return true;
+        return k is Keys.Space or Keys.Oem1 or Keys.Oem2 or Keys.Oem3 or Keys.Oem4
+            or Keys.Oem5 or Keys.Oem6 or Keys.Oem7 or Keys.Oem8 or Keys.Oem102
+            or Keys.Multiply or Keys.Add or Keys.Subtract or Keys.Decimal or Keys.Divide;
+    }
+
+    // FORK: belt and braces — clear typing again 1s after a send, once the
+    // message has landed. Skipped if the user already started typing the
+    // next message.
+    private void ResendTypingFalse()
+    {
+        _sendClearTimer.Stop();
+        if (_manualBox.Text.Length == 0) _engine.SetTyping(false);
     }
 
     private void StopTypingIndicator()
@@ -516,6 +555,7 @@ public sealed class MainForm : Form
     {
         StopTypingIndicator();
         _typingTimer.Dispose();
+        _sendClearTimer.Dispose();
         _engine.Dispose();
         base.OnFormClosed(e);
     }

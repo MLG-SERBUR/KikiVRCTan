@@ -10,7 +10,8 @@ and a native Windows UI, without touching the speech/translation backend.
 (upstream's `KikitanTranslator.Photino` project is untouched and still builds).
 
 - `Program.cs` — entry point: Serilog `Logger.Initialize()`, `AppConfig.Load()`,
-  runs `MainForm`.
+  runs `MainForm`. Single-instance guard (named mutex): a second copy
+  refuses to start instead of double-sending OSC.
 - `AppEngine.cs` — pipeline orchestration, mirrors upstream `Photino/Manager`
   (same recognizers/translators/capture, chatbox + OSC outputs, mic fallback
   watcher, overlay process launch). Adds the translation feed as a plain
@@ -29,7 +30,10 @@ and a native Windows UI, without touching the speech/translation backend.
   directly: no Start needed (standalone translation in `AppEngine` when the
   mic pipeline isn't running), and typing in it shows the VRChat typing
   indicator, cleared 5s after the last keystroke or on send. The indicator
-  is keystrokes-only — speech output never sends it.
+  is keystrokes-only — speech output never sends it — and only character
+  keys trigger it (Backspace, Delete, arrows, Enter never do); a second
+  clear goes out 1s after each send. The title bar shows the short build
+  SHA from `version.txt`, so a stale build is visible at a glance.
 - `Languages.cs` — generated from upstream
   `KikitanTranslator.Photino/UserInterface/src/util/constants.ts`.
 - `OscWatcher.cs` — copied from upstream Photino (mute detection), namespace

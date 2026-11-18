@@ -74,7 +74,9 @@ public sealed class Updater
         Environment.Exit(0);
     }
 
-    private static string LocalVersion()
+    // FORK: local version (full SHA from version.txt, or "unknown").
+    // MainForm shows the short form in the title bar.
+    internal static string LocalVersion()
     {
         var path = Path.Combine(AppContext.BaseDirectory, "version.txt");
         return File.Exists(path) ? File.ReadAllText(path).Trim() : "unknown";
