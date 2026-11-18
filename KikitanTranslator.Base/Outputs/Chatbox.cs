@@ -29,6 +29,21 @@ public class Chatbox : IOutput
         }
     }
 
+    // FORK: typing indicator on its own, with no message attached. Used
+    // while the user is composing in the Send text box, including when the
+    // engine never started (chatbox is plain OSC, no pipeline needed).
+    public void SetTyping(bool typing)
+    {
+        try
+        {
+            OscChatbox.SetIsTyping(typing);
+        }
+        catch (Exception e)
+        {
+            Log.Error($"[OSC]  Error setting typing indicator! Reason: {e}");
+        }
+    }
+
     // FORK: in the chatbox, inline parentheses around RTL text break the bidi
     // ordering. When either side is RTL, put the transcription on its own
     // line instead, no parentheses.

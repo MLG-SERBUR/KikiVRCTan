@@ -15,6 +15,11 @@ public sealed class MainForm : Form
     private Label _muted = null!;
     private TextBox _feedBox = null!;
     private TextBox _manualBox = null!;
+    // FORK: clears the typing indicator 5s after the last keystroke in the
+    // Send box, so VRChat never shows a stuck indicator. Field, not a
+    // control: it survives RebuildForUiScale (which disposes the form's
+    // controls when the UI scale changes).
+    private readonly System.Windows.Forms.Timer _typingTimer = new() { Interval = 5000 };
     private int _feedLineCount;
     private Button _updateButton = null!;
     private Updater _updater = null!;
@@ -37,6 +42,7 @@ public sealed class MainForm : Form
         _cfg = AppConfig.ConfigObject;
 
         Text = "KikiVRCTan"; // FORK (feed-overlay): product name
+        _typingTimer.Tick += (_, _) => StopTypingIndicator();
         RebuildForUiScale();
     }
 
@@ -127,6 +133,8 @@ public sealed class MainForm : Form
             {
                 if (e.KeyCode == Keys.Enter) { e.SuppressKeyPress = true; SendManualText(); }
             };
+            // FORK: typing indicator while composing (see OnManualBoxTyped).
+            _manualBox.TextChanged += (_, _) => OnManualBoxTyped();
             var send = new Button { Text = "Send", Width = S(90), Height = S(28) };
             send.Click += (_, _) => SendManualText();
             c.Controls.Add(_manualBox);
@@ -164,7 +172,6 @@ public sealed class MainForm : Form
         settings.Controls.Add(Group("Overlay", c =>
         {
             c.Controls.Add(Check("Desktop overlay", v => _cfg.DesktopOverlayEnabled = v, () => _cfg.DesktopOverlayEnabled));
-            c.Controls.Add(Check("Show timestamps", v => _cfg.OverlayShowTimestamps = v, () => _cfg.OverlayShowTimestamps));
             c.Controls.Add(Check("Show original text", v => _cfg.OverlayShowOriginal = v, () => _cfg.OverlayShowOriginal));
             c.Controls.Add(Check("Show own mic in feed", v => _cfg.FeedShowOwn = v, () => _cfg.FeedShowOwn));
             c.Controls.Add(Row("Anchor:", AnchorCombo()));
@@ -450,10 +457,29 @@ public sealed class MainForm : Form
     {
         var text = _manualBox.Text.Trim();
         if (text.Length == 0) return;
-        if (!_engine.IsRunning) { _status.Text = "Not running"; return; }
-        if (!_engine.ManualTranslate(text)) { _status.Text = "Mic pipeline off: turn on \"Translate my speech\""; return; }
+        // FORK: no Start needed anymore — the engine translates standalone
+        // when the mic pipeline isn't running.
+        StopTypingIndicator();
+        _engine.ManualTranslate(text);
         _manualBox.Clear();
         _manualBox.Focus();
+    }
+
+    // FORK: typing indicator while composing in the Send box. True on every
+    // keystroke; the 5s idle timer clears it when typing stops, so VRChat
+    // never shows a stuck indicator. Works without Start (plain OSC).
+    private void OnManualBoxTyped()
+    {
+        if (_manualBox.Text.Length == 0) { StopTypingIndicator(); return; }
+        _engine.SetTyping(true);
+        _typingTimer.Stop();
+        _typingTimer.Start();
+    }
+
+    private void StopTypingIndicator()
+    {
+        _typingTimer.Stop();
+        _engine.SetTyping(false);
     }
 
     private void WireEngine()
@@ -488,6 +514,8 @@ public sealed class MainForm : Form
 
     protected override void OnFormClosed(FormClosedEventArgs e)
     {
+        StopTypingIndicator();
+        _typingTimer.Dispose();
         _engine.Dispose();
         base.OnFormClosed(e);
     }

@@ -25,7 +25,10 @@ and a native Windows UI, without touching the speech/translation backend.
 - `MainForm.cs` — settings UI (languages, recognizer/translator, mic,
   VRChat/chatbox options, API keys, overlay settings) bound to the shared
   `AppConfig` (`%APPDATA%/Kikitan Translator/config.json`, same file as
-  upstream), plus a live feed list.
+  upstream), plus a live feed list. The Send text box translates typed text
+  directly: no Start needed (standalone translation in `AppEngine` when the
+  mic pipeline isn't running), and typing in it shows the VRChat typing
+  indicator, cleared 5s after the last keystroke or on send.
 - `Languages.cs` — generated from upstream
   `KikitanTranslator.Photino/UserInterface/src/util/constants.ts`.
 - `OscWatcher.cs` — copied from upstream Photino (mute detection), namespace
@@ -35,7 +38,7 @@ and a native Windows UI, without touching the speech/translation backend.
 
 - `Utility/AppConfig.cs`: overlay/feed settings
   (`overlay_max_entries`, `overlay_font_size`, `overlay_opacity`,
-  `overlay_anchor`, `overlay_width_cm`, `overlay_show_timestamps`,
+  `overlay_anchor`, `overlay_width_cm`,
   `overlay_show_original`, `overlay_display_duration_sec`,
   `overlay_fadeout_duration_sec`, `overlay_pos_x/y/z`,
   `desktop_overlay_enabled`) plus WinForms-only UI settings
@@ -51,7 +54,8 @@ and a native Windows UI, without touching the speech/translation backend.
   from `OverlayServer` so it can be tested in isolation (`tests/FeedTests`).
   Font size is fixed from config; **the box grows with content** (up to a cap,
   oldest lines trimmed) instead of shrinking text. Desktop entries render
-  light-blue, mic entries white, timestamps gray.
+  light-blue, mic entries white; overlay messages carry no timestamp
+  (the log feed still shows them).
 - `OverlayServer.cs` — `StartFeedReader` poll loop; `SendFeed` routes rendered
   feed frames to the desktop form / VR overlay.
 - `OpenVROverlay.cs` — anchor presets (HMD / left hand / right hand, with HMD

@@ -411,22 +411,6 @@ public class ConfigObject : INotifyPropertyChanged
         }
     }
 
-    [JsonProperty("overlay_show_timestamps")] private bool _overlayShowTimestamps = true;
-
-    [JsonIgnore]
-    public bool OverlayShowTimestamps
-    {
-        get => _overlayShowTimestamps;
-        set
-        {
-            if (_overlayShowTimestamps != value)
-            {
-                _overlayShowTimestamps = value;
-                OnPropertyChanged();
-            }
-        }
-    }
-
     [JsonProperty("desktop_overlay_enabled")] private bool _desktopOverlayEnabled = true;
 
     [JsonIgnore]

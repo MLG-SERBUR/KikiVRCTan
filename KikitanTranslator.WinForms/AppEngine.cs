@@ -33,6 +33,7 @@ public sealed class AppEngine : IDisposable
     private Loopback? _loopback;
     private FeedPipeWriter? _feedWriter;
     private OscWatcher? _oscWatcher;
+    private Chatbox? _manualChatbox;
 
     private bool _running;
     private bool _isMuted;
@@ -157,7 +158,8 @@ public sealed class AppEngine : IDisposable
         Opacity = AppConfig.ConfigObject.OverlayOpacity,
         Anchor = AppConfig.ConfigObject.OverlayAnchor,
         WidthCm = AppConfig.ConfigObject.OverlayWidthCm,
-        ShowTimestamps = AppConfig.ConfigObject.OverlayShowTimestamps,
+        // FORK: overlay messages carry no timestamp (log feed still has them).
+        ShowTimestamps = false,
         DesktopOverlay = AppConfig.ConfigObject.DesktopOverlayEnabled,
         DisplayDurationSec = AppConfig.ConfigObject.OverlayDisplayDurationSec,
         FadeoutDurationSec = AppConfig.ConfigObject.OverlayFadeoutDurationSec,
@@ -251,15 +253,79 @@ public sealed class AppEngine : IDisposable
         StatusChanged?.Invoke("Running");
     }
 
-    // FORK: typed text to translate directly. Goes through the mic pipeline
-    // (same translator, chatbox, feed, and OSC outputs as speech) but
-    // bypasses the mute gate in Kikitan.ManualTranslate, so it works while
-    // muted. Returns false when the mic pipeline is not running.
+    // FORK: typed text to translate directly. With the mic pipeline running
+    // it goes through Kikitan (same translator, chatbox, feed, and OSC
+    // outputs as speech), bypassing the mute gate, so it works while muted.
+    // Without it — engine stopped, or "Translate my speech" off — it
+    // translates standalone on a background thread and dispatches to the
+    // same outputs directly, so no Start is needed to send text.
+    // Returns false only on blank text; standalone translation runs async,
+    // so true means accepted, not yet sent.
     public bool ManualTranslate(string text)
     {
-        if (string.IsNullOrWhiteSpace(text) || _microphoneKikitan == null) return false;
-        _microphoneKikitan.ManualTranslate(text.Trim());
+        if (string.IsNullOrWhiteSpace(text)) return false;
+        text = text.Trim();
+        if (_microphoneKikitan != null)
+        {
+            _microphoneKikitan.ManualTranslate(text);
+            return true;
+        }
+        _ = Task.Run(() => ManualTranslateStandalone(text));
         return true;
+    }
+
+    private void ManualTranslateStandalone(string text)
+    {
+        var cfg = AppConfig.ConfigObject;
+        string? translated;
+        if (cfg.SpeechToTextOnly)
+        {
+            translated = "";
+        }
+        else
+        {
+            using var translator = CreateTranslator();
+            if (translator == null)
+            {
+                StatusChanged?.Invoke("Translator unavailable: check API key");
+                return;
+            }
+            try
+            {
+                // Mic direction: own text, source -> target.
+                translated = translator.Translate(text, cfg.SourceLanguage, cfg.TargetLanguage);
+            }
+            catch (Exception e)
+            {
+                Log.Error(e, "[FORK] Manual translation failed");
+                StatusChanged?.Invoke("Translation failed");
+                return;
+            }
+        }
+        if (translated == null)
+        {
+            Log.Warning("[FORK] Manual translation returned no result");
+            StatusChanged?.Invoke("Translation failed");
+            return;
+        }
+
+        // Same outputs as the mic pipeline: feed only when opted in, OSC
+        // user data, chatbox (which also clears the typing indicator).
+        if (cfg.FeedShowOwn) Feed.Add(false, text, translated);
+        if (cfg.SendUserData) new OSC("/microphone").Send(text, translated, true);
+        if (cfg.SendToChatbox) ManualChatbox.Send(text, translated, true);
+    }
+
+    // FORK: one chatbox for the manual path (send + typing indicator),
+    // created on demand so neither needs the engine started.
+    private Chatbox ManualChatbox => _manualChatbox ??= new Chatbox();
+
+    // FORK: typing indicator for the Send text box. Plain OSC, so it works
+    // without Start. Gated on SendToChatbox: no chatbox, no indicator.
+    public void SetTyping(bool typing)
+    {
+        if (!AppConfig.ConfigObject.SendToChatbox) return;
+        ManualChatbox.SetTyping(typing);
     }
 
     public void Stop()
