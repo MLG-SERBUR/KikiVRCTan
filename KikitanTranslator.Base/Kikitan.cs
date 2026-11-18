@@ -35,15 +35,21 @@ public class Kikitan : IDisposable
     // not mic input, so it bypasses the mute gate and leaves mic utterance
     // state (including a pending cut-off suppression) untouched.
     private bool _manualBypass;
+    // FORK: speech typing indicator callback (mic pipeline only, wired by
+    // AppEngine to the Chatbox). True on mic interims, false on mic finals —
+    // including translation-failed and empty finals — so it can never stick
+    // on. Manual (typed) finals never touch it; MainForm owns typed typing.
+    private readonly Action<bool>? _onTyping;
     
     public event OnRecognizerStatus? OnRecognizerStatusChanged;
 
-    public Kikitan(IRecognizer recognizer, ITranslator translator, IErrorHandler errorHandler, bool loopback, Func<bool>? shouldProcess = null)
+    public Kikitan(IRecognizer recognizer, ITranslator translator, IErrorHandler errorHandler, bool loopback, Func<bool>? shouldProcess = null, Action<bool>? onTyping = null)
     {
         _recognizer = recognizer;
         _translator = translator;
         _errorHandler = errorHandler;
         _shouldProcess = shouldProcess;
+        _onTyping = onTyping;
 
         recognizer.OnRecognitionReceived += OnRecognition;
         recognizer.OnRecognizerStatusChanged += OnRecognizerStatus;
@@ -146,6 +152,10 @@ public class Kikitan : IDisposable
         }
         if (!final)
         {
+            // FORK: mic interims mean the user is speaking — show the typing
+            // indicator. Desktop (incoming) interims never drive it, and
+            // gate-dropped interims return above without reaching here.
+            if (!_isLoopback) _onTyping?.Invoke(true);
             if (AppConfig.ConfigObject.Recognizer == 2)
             {
                 foreach (var output in _outputs)
@@ -179,6 +189,7 @@ public class Kikitan : IDisposable
                 output.Send(text.Split("|")[0], text.Split("|")[1], true);
             }
 
+            ClearSpeechTyping(manual);
             return;
         }
 
@@ -187,7 +198,7 @@ public class Kikitan : IDisposable
             output.Send(text, "", false);
         }
 
-        if (text.Length == 0) return;
+        if (text.Length == 0) { ClearSpeechTyping(manual); return; }
 
         try
         {
@@ -214,6 +225,16 @@ public class Kikitan : IDisposable
             
             _errorHandler.OnError($"Error while translating: {e.Message}");
         }
+
+        ClearSpeechTyping(manual);
+    }
+
+    // FORK: mic finals clear the speech typing indicator, including the
+    // translation-failed and empty-text exits, so it can never stick on.
+    // Manual (typed) finals never touch it — MainForm owns typed typing.
+    private void ClearSpeechTyping(bool manual)
+    {
+        if (!manual && !_isLoopback) _onTyping?.Invoke(false);
     }
 
     private void OnRecognizerStatus(RecognizerStatus status) => OnRecognizerStatusChanged?.Invoke(status);
@@ -237,9 +258,9 @@ public class Kikitan : IDisposable
                 Log.Debug($"[KKTN] Processing delayed output: desktop={_isLoopback}, remaining={_queue.Count}, sourceChars={texts[0].Length}, translationChars={texts[1].Length}");
             
                 foreach (var output in _outputs.Where(v => v.IsDelayed())) output.Send(texts[0], texts[1], true);
-                // FORK: no artificial per-char delay; send ASAP. Typing
-                // indicator is keystrokes-only (Send box via SetTyping);
-                // speech output does not touch it.
+                // FORK: no artificial per-char delay; send ASAP. Typing is
+                // driven by Kikitan (interim = true, mic final = false);
+                // Chatbox.Send itself does not touch it.
             }
         }
     }

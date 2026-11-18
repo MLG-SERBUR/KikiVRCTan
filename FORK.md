@@ -32,7 +32,10 @@ and a native Windows UI, without touching the speech/translation backend.
   indicator, cleared 5s after the last keystroke or on send. The indicator
   is keystrokes-only — speech output never sends it — and only character
   keys trigger it (Backspace, Delete, arrows, Enter never do); a second
-  clear goes out 1s after each send. The title bar shows the short build
+  clear goes out 1s after each send. Speech typing is driven separately by
+  the mic pipeline (true on interim, false on mic final including
+  translation failure, so it can't stick on); incoming speech and typed
+  sends never drive it. The title bar shows the short build
   SHA from `version.txt`, so a stale build is visible at a glance.
 - `Languages.cs` — generated from upstream
   `KikitanTranslator.Photino/UserInterface/src/util/constants.ts`.
