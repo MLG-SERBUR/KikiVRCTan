@@ -26,6 +26,11 @@ public sealed class MainForm : Form
     private Button _updateButton = null!;
     private Updater _updater = null!;
     private ComboBox _micCombo = null!;
+    // FORK: target-language quick buttons drive this combo (same path as
+    // picking from the dropdown); the list tracks the buttons so the active
+    // language can be bolded. Both are rebuilt by RebuildForUiScale.
+    private ComboBox _targetCombo = null!;
+    private readonly List<Button> _targetQuickButtons = [];
     private bool _loading = true;
 
     // FORK (vr-touch): global UI scale factor from AppConfig.UiScale (percent).
@@ -97,12 +102,23 @@ public sealed class MainForm : Form
         var split = new SplitContainer { Dock = DockStyle.Fill };
         Controls.Add(split);
 
+        // FORK: two tabs — Main is the clean talking interface (Control,
+        // Send text, target-language buttons); Settings holds everything
+        // else. The feed stays visible on the right at all times.
+        var tabs = new TabControl { Dock = DockStyle.Fill };
+        split.Panel1.Controls.Add(tabs);
+        var main = new FlowLayoutPanel
+        {
+            Dock = DockStyle.Fill, AutoScroll = true, FlowDirection = FlowDirection.TopDown,
+            WrapContents = false, Padding = new Padding(S(8)),
+        };
         var settings = new FlowLayoutPanel
         {
             Dock = DockStyle.Fill, AutoScroll = true, FlowDirection = FlowDirection.TopDown,
             WrapContents = false, Padding = new Padding(S(8)),
         };
-        split.Panel1.Controls.Add(settings);
+        tabs.TabPages.Add(new TabPage("Main") { Controls = { main } });
+        tabs.TabPages.Add(new TabPage("Settings") { Controls = { settings } });
 
         _startStop = new Button { Text = "Start", Width = S(90), Height = S(28) };
         _startStop.Click += (_, _) =>
@@ -117,7 +133,7 @@ public sealed class MainForm : Form
         _updateButton = new Button { Text = "Restart to update", Width = S(130), Height = S(28), Visible = false };
         _updateButton.Click += (_, _) => _updater.ApplyAndRestart();
 
-        settings.Controls.Add(Group("Control", c =>
+        main.Controls.Add(Group("Control", c =>
         {
             var row = new FlowLayoutPanel { FlowDirection = FlowDirection.LeftToRight, AutoSize = true, WrapContents = false };
             row.Controls.Add(_startStop);
@@ -126,11 +142,9 @@ public sealed class MainForm : Form
             c.Controls.Add(_status);
             c.Controls.Add(_muted);
             c.Controls.Add(_updateButton);
-            c.Controls.Add(Row("Log size:", Num(8, 24, v => { _cfg.LogFontSize = v; ApplyLogFont(); }, () => _cfg.LogFontSize)));
-            c.Controls.Add(Row("UI size %:", UiScaleRow()));
         }));
 
-        settings.Controls.Add(Group("Send text", c =>
+        main.Controls.Add(Group("Send text", c =>
         {
             // FORK: typed text to translate directly. Enter sends, same as
             // the Send button. Bypasses the mute gate (see AppEngine).
@@ -149,6 +163,29 @@ public sealed class MainForm : Form
             send.Click += (_, _) => SendManualText();
             c.Controls.Add(_manualBox);
             c.Controls.Add(send);
+        }));
+
+        main.Controls.Add(Group("Target language", c =>
+        {
+            // FORK: one-tap target switch — same path as picking from the
+            // To dropdown, so the engine restarts as usual. Order per user:
+            // Korean, Japanese, Chinese, Arabic, Spanish.
+            _targetQuickButtons.Clear();
+            var row = new FlowLayoutPanel { FlowDirection = FlowDirection.LeftToRight, AutoSize = true, WrapContents = false };
+            foreach (var (code, name) in new[] { ("ko", "Korean"), ("ja", "Japanese"), ("zh", "Chinese"), ("ar", "Arabic"), ("es", "Spanish") })
+            {
+                var b = new Button { Text = name, AutoSize = true, MinimumSize = new Size(0, S(36)), Tag = code };
+                b.Click += (_, _) => { SelectByCode(_targetCombo, code); RefreshTargetQuickButtons(); };
+                _targetQuickButtons.Add(b);
+                row.Controls.Add(b);
+            }
+            c.Controls.Add(row);
+        }));
+
+        settings.Controls.Add(Group("Display", c =>
+        {
+            c.Controls.Add(Row("Log size:", Num(8, 24, v => { _cfg.LogFontSize = v; ApplyLogFont(); }, () => _cfg.LogFontSize)));
+            c.Controls.Add(Row("UI size %:", UiScaleRow()));
         }));
 
         settings.Controls.Add(Group("Speech", c =>
@@ -271,8 +308,13 @@ public sealed class MainForm : Form
     private ComboBox TargetCombo()
     {
         var cb = DropDown(Languages.Target.Select(l => new LangOption(l.Code, l.Name)).ToArray());
-        cb.SelectedIndexChanged += (_, _) => { if (!_loading && cb.SelectedItem is LangOption o) _cfg.TargetLanguage = o.Code; };
+        cb.SelectedIndexChanged += (_, _) =>
+        {
+            if (!_loading && cb.SelectedItem is LangOption o) _cfg.TargetLanguage = o.Code;
+            RefreshTargetQuickButtons();
+        };
         cb.Tag = "target";
+        _targetCombo = cb;
         return cb;
     }
 
@@ -281,7 +323,16 @@ public sealed class MainForm : Form
         var cb = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList };
         cb.Items.AddRange(items);
         cb.DisplayMember = "Name";
+        NoWheelWhenClosed(cb);
         return cb;
+    }
+
+    // FORK: scrolling the settings pane must never change a dropdown the
+    // cursor happens to pass over — the wheel only counts while the list
+    // is open. (Touch scrolling was flipping languages/recognizers.)
+    private static void NoWheelWhenClosed(ComboBox cb)
+    {
+        cb.MouseWheel += (_, e) => { if (!cb.DroppedDown) ((HandledMouseEventArgs)e).Handled = true; };
     }
 
     private ComboBox RecognizerCombo()
@@ -313,6 +364,7 @@ public sealed class MainForm : Form
         var p = new Panel { Width = S(280), Height = S(30) };
         var l = new Label { Text = "Mic:", Width = S(100), Top = S(6), Left = 0, AutoSize = false };
         _micCombo = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList, Left = S(104), Top = S(3), Width = S(110) };
+        NoWheelWhenClosed(_micCombo);
         _micCombo.SelectedIndexChanged += (_, _) =>
         {
             if (!_loading && _micCombo.SelectedItem is string name) _cfg.Microphone = name;
@@ -371,15 +423,37 @@ public sealed class MainForm : Form
         _loading = true;
         try
         {
-            foreach (var gb in Controls.OfType<SplitContainer>().SelectMany(s => s.Panel1.Controls.OfType<FlowLayoutPanel>())
-                         .SelectMany(f => f.Controls.OfType<GroupBox>()))
+            // FORK: groups now live under the Main/Settings tabs, so walk
+            // Panel1 recursively instead of assuming a flat panel.
+            foreach (var gb in Controls.OfType<SplitContainer>().SelectMany(s => AllGroups(s.Panel1)))
             {
                 foreach (var row in gb.Controls.OfType<FlowLayoutPanel>().SelectMany(f => f.Controls.OfType<Control>()))
                     ApplyConfig(row);
             }
             RefreshMics();
+            RefreshTargetQuickButtons();
         }
         finally { _loading = false; }
+    }
+
+    private static IEnumerable<GroupBox> AllGroups(Control root)
+    {
+        foreach (var c in root.Controls.OfType<Control>())
+        {
+            if (c is GroupBox gb) yield return gb;
+            foreach (var g in AllGroups(c)) yield return g;
+        }
+    }
+
+    // FORK: bold the quick button matching the current target language.
+    private void RefreshTargetQuickButtons()
+    {
+        foreach (var b in _targetQuickButtons)
+        {
+            var old = b.Font;
+            b.Font = new Font(Font, b.Tag is string code && code == _cfg.TargetLanguage ? FontStyle.Bold : FontStyle.Regular);
+            if (!ReferenceEquals(old, Font)) old.Dispose();
+        }
     }
 
     private void ApplyConfig(Control row)

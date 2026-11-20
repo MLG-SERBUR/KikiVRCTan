@@ -26,7 +26,13 @@ and a native Windows UI, without touching the speech/translation backend.
 - `MainForm.cs` — settings UI (languages, recognizer/translator, mic,
   VRChat/chatbox options, API keys, overlay settings) bound to the shared
   `AppConfig` (`%APPDATA%/Kikitan Translator/config.json`, same file as
-  upstream), plus a live feed list. The Send text box translates typed text
+  upstream), plus a live feed list. Two tabs: Main (Start/Stop, Send text,
+  target-language quick buttons) and Settings (everything else). The quick
+  buttons switch the target language in one tap — Korean, Japanese,
+  Chinese, Arabic, Spanish, in that order — through the same path as the
+  To dropdown, with the active one bolded. A dropdown never changes on
+  mouse-wheel scroll unless its list is open, so scrolling the pane can't
+  flip a setting the cursor passes over. The Send text box translates typed text
   directly: no Start needed (standalone translation in `AppEngine` when the
   mic pipeline isn't running), and typing in it shows the VRChat typing
   indicator, cleared 5s after the last keystroke or on send. The indicator
