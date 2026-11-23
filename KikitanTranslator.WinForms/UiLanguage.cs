@@ -12,14 +12,19 @@ namespace KikitanTranslator.WinForms;
 
 public static class UiLanguage
 {
-    public static readonly (string Code, string NativeName)[] Supported =
+    // Flag is the regional-indicator emoji for the language's most
+    // associated country (US for English, Saudi Arabia for Arabic — no
+    // single flag exists for a language). Note: Windows has no flag
+    // glyphs, so these render as the two-letter code ("KR", "JP") rather
+    // than a picture; the native name next to it carries the meaning.
+    public static readonly (string Code, string NativeName, string Flag)[] Supported =
     [
-        ("en", "English"),
-        ("ko", "한국어"),
-        ("ja", "日本語"),
-        ("zh", "中文"),
-        ("ar", "العربية"),
-        ("es", "Español"),
+        ("en", "English", "🇺🇸"),
+        ("ko", "한국어", "🇰🇷"),
+        ("ja", "日本語", "🇯🇵"),
+        ("zh", "中文", "🇨🇳"),
+        ("ar", "العربية", "🇸🇦"),
+        ("es", "Español", "🇪🇸"),
     ];
 
     // The user's Windows display language, when it is one we translate.
@@ -38,6 +43,9 @@ public static class UiLanguage
 
     public static string NativeName(string code)
         => Supported.FirstOrDefault(l => l.Code == code).NativeName ?? "English";
+
+    public static string Flag(string code)
+        => Supported.FirstOrDefault(l => l.Code == code).Flag ?? "";
 
     // First-run source language for a UI language. The Source list has no
     // plain "es" (Spanish is regional there), so Spanish gets es-ES.

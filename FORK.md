@@ -35,9 +35,11 @@ and a native Windows UI, without touching the speech/translation backend.
   flip a setting the cursor passes over. UI language: `UiLanguage.cs`
   translates the whole UI into English, Korean, Japanese, Chinese, Arabic
   and Spanish (one table, no .resx); it defaults to the Windows display
-  language and is switched from a 🌐 button on Main that lists all six in
-  their native names (a flag emoji would render as letter pairs on
-  Windows, so the native name carries it; saved as `ui_language`, empty
+  language and is switched from a button on Main showing the current
+  language's flag + native name, with a menu listing all six the same
+  way (Windows has no flag glyphs, so the flag emoji renders as the
+  two-letter code — "KR", "JP" — next to the name, and Arabic uses the
+  Saudi flag as the conventional stand-in; saved as `ui_language`, empty
   means follow Windows). The From dropdown is on Main too, synced with
   the one in Settings, and on a true first run it defaults to the UI
   language (Spanish maps to es-ES, the Source list has no plain "es").
