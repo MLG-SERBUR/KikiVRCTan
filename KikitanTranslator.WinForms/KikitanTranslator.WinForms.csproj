@@ -6,7 +6,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <UseWindowsForms>true</UseWindowsForms>
-        <AssemblyName>KikitanTranslator.WinForms</AssemblyName>
+        <AssemblyName>KikitanTranslator</AssemblyName>
         <RootNamespace>KikitanTranslator.WinForms</RootNamespace>
         <Version>2.1.0</Version>
         <ApplicationIcon>..\KikitanTranslator.Photino\Resources\wwwroot\kikitan_logo.ico</ApplicationIcon>

@@ -120,7 +120,7 @@ just the two exes, `silero_vad.onnx`, and `version.txt`) as
 `KikiVRCTan-portable.zip`, attached to the `feed-overlay-latest` prerelease
 (and as a workflow artifact).
 
-Download, extract anywhere, run `KikitanTranslator.WinForms.exe`. Everything
+Download, extract anywhere, run `KikitanTranslator.exe`. Everything
 (app, `config.json`, `logs/`) stays in that one folder: no %APPDATA%, no
 registry, no install step, no admin rights. To update, extract the new zip
 over the same folder — the zip contains no `config.json`, so your settings

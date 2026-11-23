@@ -14,7 +14,7 @@ public sealed class Updater
 {
     private const string ReleaseBase = "https://github.com/MLG-SERBUR/kikitan-translator/releases/download/feed-overlay-latest";
     private const string ZipName = "KikiVRCTan-portable.zip";
-    private const string AppExe = "KikitanTranslator.WinForms.exe";
+    private const string AppExe = "KikitanTranslator.exe";
 
     public event Action<string>? StatusChanged;
     public event Action? UpdateReady;
@@ -66,6 +66,10 @@ public sealed class Updater
             "@echo off\r\n" +
             "timeout /t 3 /nobreak >nul\r\n" +
             $"robocopy \"{stageDir}\" \"{appDir}\" /E /XF config.json >nul\r\n" +
+            // FORK: one-time rename cleanup — the exe used to be
+            // KikitanTranslator.WinForms.exe; delete the stale copy so it
+            // can't be launched by mistake after the update.
+            $"del \"{Path.Combine(appDir, "KikitanTranslator.WinForms.exe")}\" >nul 2>&1\r\n" +
             $"start \"\" \"{Path.Combine(appDir, AppExe)}\"\r\n" +
             $"rmdir /s /q \"{stageDir}\"\r\n" +
             "del \"%~f0\"\r\n");
