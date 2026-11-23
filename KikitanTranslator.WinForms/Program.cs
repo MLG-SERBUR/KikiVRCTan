@@ -23,7 +23,16 @@ static class Program
         AppConfig.UseExecutableDirectory = true;
 
         Logger.Initialize();
+        // FORK: true first run — no config next to the exe and none to
+        // migrate from the legacy location. Default the source language to
+        // the user's Windows language (Spanish maps to es-ES; the Source
+        // list has no plain "es"). Existing configs keep their language.
+        var exeConfig = Path.Join(AppConfig.GetAppFolder(), "config.json");
+        var legacyConfig = Path.Join(AppConfig.GetLegacyAppFolder(), "config.json");
+        bool firstRun = !File.Exists(exeConfig) && !File.Exists(legacyConfig);
         AppConfig.Load();
+        if (firstRun)
+            AppConfig.ConfigObject.SourceLanguage = UiLanguage.MapToSource(UiLanguage.DetectSystem());
 
         ApplicationConfiguration.Initialize();
         using var engine = new AppEngine();

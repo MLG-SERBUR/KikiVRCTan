@@ -31,6 +31,12 @@ public sealed class MainForm : Form
     // language can be bolded. Both are rebuilt by RebuildForUiScale.
     private ComboBox _targetCombo = null!;
     private readonly List<Button> _targetQuickButtons = [];
+    // FORK: resolved UI language (saved choice, else Windows language).
+    private string _uiLang = "en";
+    // FORK: both From dropdowns (Main tab + Settings) stay in sync.
+    private readonly List<ComboBox> _sourceCombos = [];
+    // FORK: UI-language menu, rebuilt with the layout; disposed on rebuild.
+    private ContextMenuStrip? _langMenu;
     private bool _loading = true;
 
     // FORK (vr-touch): global UI scale factor from AppConfig.UiScale (percent).
@@ -63,6 +69,7 @@ public sealed class MainForm : Form
         try
         {
             _uiFactor = Math.Clamp(_cfg.UiScale, 80, 250) / 100f;
+            _uiLang = UiLanguage.Resolve(_cfg.UiLanguage);
             var familyName = Font.FontFamily.Name;
             _ownedFont?.Dispose();
             _ownedFont = new Font(familyName, 9f * _uiFactor);
@@ -99,6 +106,9 @@ public sealed class MainForm : Form
 
     private void BuildLayout()
     {
+        // FORK: old controls are disposed by RebuildForUiScale; drop the
+        // stale references they leave behind.
+        _sourceCombos.Clear();
         var split = new SplitContainer { Dock = DockStyle.Fill };
         Controls.Add(split);
 
@@ -117,34 +127,35 @@ public sealed class MainForm : Form
             Dock = DockStyle.Fill, AutoScroll = true, FlowDirection = FlowDirection.TopDown,
             WrapContents = false, Padding = new Padding(S(8)),
         };
-        tabs.TabPages.Add(new TabPage("Main") { Controls = { main } });
-        tabs.TabPages.Add(new TabPage("Settings") { Controls = { settings } });
+        tabs.TabPages.Add(new TabPage(T("Main")) { Controls = { main } });
+        tabs.TabPages.Add(new TabPage(T("Settings")) { Controls = { settings } });
 
-        _startStop = new Button { Text = "Start", Width = S(90), Height = S(28) };
+        _startStop = new Button { Text = T("Start"), Width = S(90), Height = S(28) };
         _startStop.Click += (_, _) =>
         {
             if (_engine.IsRunning) _engine.Stop(); else _engine.Start();
-            _startStop.Text = _engine.IsRunning ? "Stop" : "Start";
+            _startStop.Text = _engine.IsRunning ? T("Stop") : T("Start");
         };
-        _status = new Label { Text = "Stopped", AutoSize = true, Padding = new Padding(0, S(6), 0, 0) };
+        _status = new Label { Text = T("Stopped"), AutoSize = true, Padding = new Padding(0, S(6), 0, 0) };
         _muted = new Label { Text = "", AutoSize = true, ForeColor = Color.DarkRed };
-        var clearFeed = new Button { Text = "Clear feed", Width = S(90), Height = S(28) };
+        var clearFeed = new Button { Text = T("Clear feed"), Width = S(90), Height = S(28) };
         clearFeed.Click += (_, _) => { _engine.Feed.Clear(); _feedBox.Clear(); _feedLineCount = 0; };
-        _updateButton = new Button { Text = "Restart to update", Width = S(130), Height = S(28), Visible = false };
+        _updateButton = new Button { Text = T("Restart to update"), Width = S(130), Height = S(28), Visible = false };
         _updateButton.Click += (_, _) => _updater.ApplyAndRestart();
 
-        main.Controls.Add(Group("Control", c =>
+        main.Controls.Add(Group(T("Control"), c =>
         {
             var row = new FlowLayoutPanel { FlowDirection = FlowDirection.LeftToRight, AutoSize = true, WrapContents = false };
             row.Controls.Add(_startStop);
             row.Controls.Add(clearFeed);
+            row.Controls.Add(LanguageButton());
             c.Controls.Add(row);
             c.Controls.Add(_status);
             c.Controls.Add(_muted);
             c.Controls.Add(_updateButton);
         }));
 
-        main.Controls.Add(Group("Send text", c =>
+        main.Controls.Add(Group(T("Send text"), c =>
         {
             // FORK: typed text to translate directly. Enter sends, same as
             // the Send button. Bypasses the mute gate (see AppEngine).
@@ -159,14 +170,17 @@ public sealed class MainForm : Form
             // (backspace / cut / Clear). Backspace, Delete, arrows, Enter
             // and other non-character keys never send the indicator.
             _manualBox.TextChanged += (_, _) => { if (_manualBox.Text.Length == 0) StopTypingIndicator(); };
-            var send = new Button { Text = "Send", Width = S(90), Height = S(28) };
+            var send = new Button { Text = T("Send"), Width = S(90), Height = S(28) };
             send.Click += (_, _) => SendManualText();
             c.Controls.Add(_manualBox);
             c.Controls.Add(send);
         }));
 
-        main.Controls.Add(Group("Target language", c =>
+        main.Controls.Add(Group(T("Languages"), c =>
         {
+            // FORK: From stays a dropdown (per user), shown here as well as
+            // in Settings; the two stay in sync through SourceCombo.
+            c.Controls.Add(Row(T("From:"), SourceCombo()));
             // FORK: one-tap target switch — same path as picking from the
             // To dropdown, so the engine restarts as usual. Order per user:
             // Korean, Japanese, Chinese, Arabic, Spanish.
@@ -182,55 +196,55 @@ public sealed class MainForm : Form
             c.Controls.Add(row);
         }));
 
-        settings.Controls.Add(Group("Display", c =>
+        settings.Controls.Add(Group(T("Display"), c =>
         {
-            c.Controls.Add(Row("Log size:", Num(8, 24, v => { _cfg.LogFontSize = v; ApplyLogFont(); }, () => _cfg.LogFontSize)));
-            c.Controls.Add(Row("UI size %:", UiScaleRow()));
+            c.Controls.Add(Row(T("Log size:"), Num(8, 24, v => { _cfg.LogFontSize = v; ApplyLogFont(); }, () => _cfg.LogFontSize)));
+            c.Controls.Add(Row(T("UI size %:"), UiScaleRow()));
         }));
 
-        settings.Controls.Add(Group("Speech", c =>
+        settings.Controls.Add(Group(T("Speech"), c =>
         {
-            c.Controls.Add(Row("From:", SourceCombo()));
-            c.Controls.Add(Row("To:", TargetCombo()));
-            c.Controls.Add(Row("Recognizer:", RecognizerCombo()));
-            c.Controls.Add(Row("Translator:", TranslatorCombo()));
+            c.Controls.Add(Row(T("From:"), SourceCombo()));
+            c.Controls.Add(Row(T("To:"), TargetCombo()));
+            c.Controls.Add(Row(T("Recognizer:"), RecognizerCombo()));
+            c.Controls.Add(Row(T("Translator:"), TranslatorCombo()));
             c.Controls.Add(MicLabeledRow());
-            c.Controls.Add(Check("Show transcription", v => _cfg.FeedShowTranscription = v, () => _cfg.FeedShowTranscription));
-            c.Controls.Add(Check("Translate my speech", v => _cfg.MicTranslation = v, () => _cfg.MicTranslation));
-            c.Controls.Add(Check("Translate incoming speech", v => _cfg.DesktopTranslation = v, () => _cfg.DesktopTranslation));
-            c.Controls.Add(Check("Transcription only (no translation)", v => _cfg.SpeechToTextOnly = v, () => _cfg.SpeechToTextOnly));
+            c.Controls.Add(Check(T("Show transcription"), v => _cfg.FeedShowTranscription = v, () => _cfg.FeedShowTranscription));
+            c.Controls.Add(Check(T("Translate my speech"), v => _cfg.MicTranslation = v, () => _cfg.MicTranslation));
+            c.Controls.Add(Check(T("Translate incoming speech"), v => _cfg.DesktopTranslation = v, () => _cfg.DesktopTranslation));
+            c.Controls.Add(Check(T("Transcription only (no translation)"), v => _cfg.SpeechToTextOnly = v, () => _cfg.SpeechToTextOnly));
         }));
 
-        settings.Controls.Add(Group("VRChat", c =>
+        settings.Controls.Add(Group(T("VRChat"), c =>
         {
-            c.Controls.Add(Check("Send to chatbox", v => _cfg.SendToChatbox = v, () => _cfg.SendToChatbox));
-            c.Controls.Add(Check("Translation only (no original)", v => _cfg.TranslationOnly = v, () => _cfg.TranslationOnly));
-            c.Controls.Add(Check("Send without waiting for finish", v => _cfg.SendWithoutWaitingForFinish = v, () => _cfg.SendWithoutWaitingForFinish));
-            c.Controls.Add(Check("Disable when muted", v => _cfg.DisableWhenMuted = v, () => _cfg.DisableWhenMuted));
-            c.Controls.Add(Check("Send user data (OSC)", v => _cfg.SendUserData = v, () => _cfg.SendUserData));
+            c.Controls.Add(Check(T("Send to chatbox"), v => _cfg.SendToChatbox = v, () => _cfg.SendToChatbox));
+            c.Controls.Add(Check(T("Translation only (no original)"), v => _cfg.TranslationOnly = v, () => _cfg.TranslationOnly));
+            c.Controls.Add(Check(T("Send without waiting for finish"), v => _cfg.SendWithoutWaitingForFinish = v, () => _cfg.SendWithoutWaitingForFinish));
+            c.Controls.Add(Check(T("Disable when muted"), v => _cfg.DisableWhenMuted = v, () => _cfg.DisableWhenMuted));
+            c.Controls.Add(Check(T("Send user data (OSC)"), v => _cfg.SendUserData = v, () => _cfg.SendUserData));
         }));
 
-        settings.Controls.Add(Group("API keys", c =>
+        settings.Controls.Add(Group(T("API keys"), c =>
         {
-            c.Controls.Add(Row("Groq:", KeyBox(v => _cfg.GroqApiKey = v, () => _cfg.GroqApiKey)));
-            c.Controls.Add(Row("Gemini:", KeyBox(v => _cfg.GeminiApiKey = v, () => _cfg.GeminiApiKey)));
+            c.Controls.Add(Row(T("Groq:"), KeyBox(v => _cfg.GroqApiKey = v, () => _cfg.GroqApiKey)));
+            c.Controls.Add(Row(T("Gemini:"), KeyBox(v => _cfg.GeminiApiKey = v, () => _cfg.GeminiApiKey)));
         }));
 
-        settings.Controls.Add(Group("Overlay", c =>
+        settings.Controls.Add(Group(T("Overlay"), c =>
         {
-            c.Controls.Add(Check("Desktop overlay", v => _cfg.DesktopOverlayEnabled = v, () => _cfg.DesktopOverlayEnabled));
-            c.Controls.Add(Check("Show original text", v => _cfg.OverlayShowOriginal = v, () => _cfg.OverlayShowOriginal));
-            c.Controls.Add(Check("Show own mic in feed", v => _cfg.FeedShowOwn = v, () => _cfg.FeedShowOwn));
-            c.Controls.Add(Row("Anchor:", AnchorCombo()));
-            c.Controls.Add(Row("Max entries:", Num(1, 12, v => _cfg.OverlayMaxEntries = v, () => _cfg.OverlayMaxEntries)));
-            c.Controls.Add(Row("Font size:", Num(24, 160, v => _cfg.OverlayFontSize = v, () => _cfg.OverlayFontSize)));
-            c.Controls.Add(Row("Width (cm):", Num(40, 200, v => _cfg.OverlayWidthCm = v, () => _cfg.OverlayWidthCm)));
-            c.Controls.Add(Row("Opacity %:", OpacityRow()));
-            c.Controls.Add(Row("Display sec (0=always):", Num(0, 3600, v => _cfg.OverlayDisplayDurationSec = v, () => _cfg.OverlayDisplayDurationSec)));
-            c.Controls.Add(Row("Fadeout sec:", Num(0, 30, v => _cfg.OverlayFadeoutDurationSec = v, () => _cfg.OverlayFadeoutDurationSec)));
-            c.Controls.Add(Row("Pos X (m):", DblNum(-2, 2, v => _cfg.OverlayPosX = v, () => _cfg.OverlayPosX)));
-            c.Controls.Add(Row("Pos Y (m):", DblNum(-2, 2, v => _cfg.OverlayPosY = v, () => _cfg.OverlayPosY)));
-            c.Controls.Add(Row("Pos Z (m):", DblNum(-2, 2, v => _cfg.OverlayPosZ = v, () => _cfg.OverlayPosZ)));
+            c.Controls.Add(Check(T("Desktop overlay"), v => _cfg.DesktopOverlayEnabled = v, () => _cfg.DesktopOverlayEnabled));
+            c.Controls.Add(Check(T("Show original text"), v => _cfg.OverlayShowOriginal = v, () => _cfg.OverlayShowOriginal));
+            c.Controls.Add(Check(T("Show own mic in feed"), v => _cfg.FeedShowOwn = v, () => _cfg.FeedShowOwn));
+            c.Controls.Add(Row(T("Anchor:"), AnchorCombo()));
+            c.Controls.Add(Row(T("Max entries:"), Num(1, 12, v => _cfg.OverlayMaxEntries = v, () => _cfg.OverlayMaxEntries)));
+            c.Controls.Add(Row(T("Font size:"), Num(24, 160, v => _cfg.OverlayFontSize = v, () => _cfg.OverlayFontSize)));
+            c.Controls.Add(Row(T("Width (cm):"), Num(40, 200, v => _cfg.OverlayWidthCm = v, () => _cfg.OverlayWidthCm)));
+            c.Controls.Add(Row(T("Opacity %:"), OpacityRow()));
+            c.Controls.Add(Row(T("Display sec (0=always):"), Num(0, 3600, v => _cfg.OverlayDisplayDurationSec = v, () => _cfg.OverlayDisplayDurationSec)));
+            c.Controls.Add(Row(T("Fadeout sec:"), Num(0, 30, v => _cfg.OverlayFadeoutDurationSec = v, () => _cfg.OverlayFadeoutDurationSec)));
+            c.Controls.Add(Row(T("Pos X (m):"), DblNum(-2, 2, v => _cfg.OverlayPosX = v, () => _cfg.OverlayPosX)));
+            c.Controls.Add(Row(T("Pos Y (m):"), DblNum(-2, 2, v => _cfg.OverlayPosY = v, () => _cfg.OverlayPosY)));
+            c.Controls.Add(Row(T("Pos Z (m):"), DblNum(-2, 2, v => _cfg.OverlayPosZ = v, () => _cfg.OverlayPosZ)));
         }));
 
         _feedBox = new TextBox
@@ -247,12 +261,24 @@ public sealed class MainForm : Form
         split.SplitterDistance = S(320);
 
         _updater = new Updater();
-        _updater.StatusChanged += msg => BeginInvoke(() => _status.Text = msg);
+        _updater.StatusChanged += msg => BeginInvoke(() => _status.Text = TranslateStatus(msg));
         _updater.UpdateReady += () => BeginInvoke(() => _updateButton.Visible = true);
         if (!_wired) Task.Run(() => _updater.CheckAsync());
     }
 
     private int S(int px) => (int)Math.Round(px * _uiFactor);
+
+    private string T(string key) => UiLanguage.T(_uiLang, key);
+
+    // FORK: status lines from the engine/updater arrive in English; show
+    // the translated form for the known ones, pass the rest through (error
+    // text stays English — it is diagnostic, not UI).
+    private string TranslateStatus(string msg) => msg switch
+    {
+        "Stopped" or "Running" or "Translator unavailable: check API key"
+            or "Translation failed" or "Downloading update..." or "Update downloaded" => T(msg),
+        _ => msg,
+    };
 
     private NumericUpDown UiScaleRow()
     {
@@ -267,7 +293,7 @@ public sealed class MainForm : Form
                 BeginInvoke((Action)(() =>
                 {
                     RebuildForUiScale();
-                    _status.Text = $"UI size {_cfg.UiScale}% applied";
+                    _status.Text = string.Format(T("UI size {0}% applied"), _cfg.UiScale);
                 }));
             },
             () => _cfg.UiScale);
@@ -297,11 +323,47 @@ public sealed class MainForm : Form
         return p;
     }
 
+    // FORK: UI-language switcher — a button showing the current language
+    // (globe + native name) with a menu of all six. A flag emoji would
+    // render as letter pairs on Windows, so the native name carries it.
+    private Button LanguageButton()
+    {
+        _langMenu?.Dispose();
+        _langMenu = new ContextMenuStrip();
+        foreach (var (code, name) in UiLanguage.Supported)
+        {
+            var item = new ToolStripMenuItem(name) { Checked = code == _uiLang };
+            item.Click += (_, _) =>
+            {
+                if (_cfg.UiLanguage == code) return;
+                _cfg.UiLanguage = code;
+                // Rebuild once this event unwinds: the menu and button are
+                // disposed by the rebuild.
+                BeginInvoke((Action)RebuildForUiScale);
+            };
+            _langMenu.Items.Add(item);
+        }
+        var b = new Button { Text = "🌐 " + UiLanguage.NativeName(_uiLang), AutoSize = true, Height = S(28) };
+        b.Click += (_, _) => _langMenu?.Show(b, new Point(0, b.Height));
+        return b;
+    }
+
     private ComboBox SourceCombo()
     {
         var cb = DropDown(Languages.Source.Select(l => new LangOption(l.Code, l.Name)).ToArray());
-        cb.SelectedIndexChanged += (_, _) => { if (!_loading && cb.SelectedItem is LangOption o) _cfg.SourceLanguage = o.Code; };
+        cb.SelectedIndexChanged += (_, _) =>
+        {
+            if (!_loading && cb.SelectedItem is LangOption o)
+            {
+                _cfg.SourceLanguage = o.Code;
+                // FORK: the From dropdown exists twice (Main + Settings);
+                // keep the other one on the same language.
+                foreach (var other in _sourceCombos)
+                    if (other != cb) SelectByCode(other, o.Code);
+            }
+        };
         cb.Tag = "source";
+        _sourceCombos.Add(cb);
         return cb;
     }
 
@@ -353,7 +415,7 @@ public sealed class MainForm : Form
 
     private ComboBox AnchorCombo()
     {
-        var cb = DropDown([new("0", "HMD"), new("1", "Left hand"), new("2", "Right hand")]);
+        var cb = DropDown([new("0", "HMD"), new("1", T("Left hand")), new("2", T("Right hand"))]);
         cb.SelectedIndexChanged += (_, _) => { if (!_loading && cb.SelectedItem is LangOption o) _cfg.OverlayAnchor = int.Parse(o.Code); };
         cb.Tag = "anchor";
         return cb;
@@ -362,14 +424,14 @@ public sealed class MainForm : Form
     private Panel MicLabeledRow()
     {
         var p = new Panel { Width = S(280), Height = S(30) };
-        var l = new Label { Text = "Mic:", Width = S(100), Top = S(6), Left = 0, AutoSize = false };
+        var l = new Label { Text = T("Mic:"), Width = S(100), Top = S(6), Left = 0, AutoSize = false };
         _micCombo = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList, Left = S(104), Top = S(3), Width = S(110) };
         NoWheelWhenClosed(_micCombo);
         _micCombo.SelectedIndexChanged += (_, _) =>
         {
             if (!_loading && _micCombo.SelectedItem is string name) _cfg.Microphone = name;
         };
-        var refresh = new Button { Text = "Refresh", Left = S(220), Top = S(2), Width = S(58), Height = S(24) };
+        var refresh = new Button { Text = T("Refresh"), Left = S(220), Top = S(2), Width = S(58), Height = S(24) };
         refresh.Click += (_, _) => RefreshMics();
         p.Controls.Add(l); p.Controls.Add(_micCombo); p.Controls.Add(refresh);
         return p;
@@ -597,11 +659,11 @@ public sealed class MainForm : Form
 
     private void WireEngine()
     {
-        _engine.StatusChanged += msg => BeginInvoke(() => _status.Text = msg);
+        _engine.StatusChanged += msg => BeginInvoke(() => _status.Text = TranslateStatus(msg));
         // FORK: show a mute state pulled at startup even if it arrived
         // before this form wired up (the gate in AppEngine already has it).
-        _muted.Text = _engine.IsMuted == true ? "MUTED" : "";
-        _engine.MuteChanged += muted => BeginInvoke(() => _muted.Text = muted ? "MUTED" : "");
+        _muted.Text = _engine.IsMuted == true ? T("MUTED") : "";
+        _engine.MuteChanged += muted => BeginInvoke(() => _muted.Text = muted ? T("MUTED") : "");
         _engine.Feed.EntryAdded += entry => BeginInvoke(() =>
         {
             _feedBox.AppendText(entry.DisplayText(true, _cfg.FeedShowTranscription) + Environment.NewLine);

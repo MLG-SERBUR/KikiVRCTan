@@ -612,6 +612,23 @@ public class ConfigObject : INotifyPropertyChanged
             }
         }
     }
+    // FORK: WinForms UI language code (en/ko/ja/zh/ar/es). "" means never
+    // chosen — MainForm follows the Windows display language instead.
+    [JsonProperty("ui_language")] private string _uiLanguage = "";
+
+    [JsonIgnore]
+    public string UiLanguage
+    {
+        get => _uiLanguage;
+        set
+        {
+            if (_uiLanguage != value)
+            {
+                _uiLanguage = value;
+                OnPropertyChanged();
+            }
+        }
+    }
     // END FORK
 
     protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
