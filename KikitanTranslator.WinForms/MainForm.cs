@@ -324,14 +324,18 @@ public sealed class MainForm : Form
     }
 
     // FORK: UI-language switcher — a button showing the current language
-    // (flag + native name) with a menu of all six.
+    // (bundled flag image + native name) with a menu of all seven.
     private Button LanguageButton()
     {
         _langMenu?.Dispose();
-        _langMenu = new ContextMenuStrip();
-        foreach (var (code, name, flag) in UiLanguage.Supported)
+        _langMenu = new ContextMenuStrip { ImageScalingSize = new Size(S(24), S(18)) };
+        foreach (var (code, name) in UiLanguage.Supported)
         {
-            var item = new ToolStripMenuItem($"{flag} {name}") { Checked = code == _uiLang };
+            var item = new ToolStripMenuItem(name)
+            {
+                Checked = code == _uiLang,
+                Image = FlagImages.Get(code, S(24), S(18)),
+            };
             item.Click += (_, _) =>
             {
                 if (_cfg.UiLanguage == code) return;
@@ -342,7 +346,15 @@ public sealed class MainForm : Form
             };
             _langMenu.Items.Add(item);
         }
-        var b = new Button { Text = $"{UiLanguage.Flag(_uiLang)} {UiLanguage.NativeName(_uiLang)}", AutoSize = true, Height = S(28) };
+        var b = new Button
+        {
+            Text = UiLanguage.NativeName(_uiLang),
+            Image = FlagImages.Get(_uiLang, S(24), S(18)),
+            ImageAlign = ContentAlignment.MiddleLeft,
+            TextImageRelation = TextImageRelation.ImageBeforeText,
+            AutoSize = true,
+            Height = S(28),
+        };
         b.Click += (_, _) => _langMenu?.Show(b, new Point(0, b.Height));
         return b;
     }

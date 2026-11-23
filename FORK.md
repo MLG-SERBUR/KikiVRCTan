@@ -33,14 +33,16 @@ and a native Windows UI, without touching the speech/translation backend.
   To dropdown, with the active one bolded. A dropdown never changes on
   mouse-wheel scroll unless its list is open, so scrolling the pane can't
   flip a setting the cursor passes over. UI language: `UiLanguage.cs`
-  translates the whole UI into English, Korean, Japanese, Chinese, Arabic
-  and Spanish (one table, no .resx); it defaults to the Windows display
-  language and is switched from a button on Main showing the current
-  language's flag + native name, with a menu listing all six the same
-  way (Windows has no flag glyphs, so the flag emoji renders as the
-  two-letter code — "KR", "JP" — next to the name, and Arabic uses the
-  Saudi flag as the conventional stand-in; saved as `ui_language`, empty
-  means follow Windows). The From dropdown is on Main too, synced with
+  translates the whole UI into English, Korean, Japanese, Chinese, Arabic,
+  Spanish and Russian (one table, no .resx); it defaults to the Windows
+  display language and is switched from a button on Main showing the current
+  language's flag + native name, with a menu listing all seven the same
+  way. The flags are real pictures, not emoji — Windows has no flag glyphs
+  (Segoe UI Emoji renders them as the two-letter code) — bundled as
+  embedded PNGs in `Resources/flags/` (`FlagImages.cs` scales them per UI
+  size), flat 4:3 renders of lipis/flag-icons via flagcdn.com, MIT (license
+  in `Resources/flags/LICENSE.txt`); Arabic uses the Saudi flag as the
+  conventional stand-in. Saved as `ui_language`, empty means follow Windows. The From dropdown is on Main too, synced with
   the one in Settings, and on a true first run it defaults to the UI
   language (Spanish maps to es-ES, the Source list has no plain "es").
   Layout stays left-to-right in all languages; changing the UI language

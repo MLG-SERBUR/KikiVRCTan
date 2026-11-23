@@ -1,10 +1,12 @@
 // FORK (feed-overlay): UI language support. The WinForms UI strings live
-// here, keyed by their English text, in six languages: English plus the
+// here, keyed by their English text, in seven languages: English plus the
 // five target-language quick buttons (Korean, Japanese, Chinese, Arabic,
-// Spanish). No .resx, no new dependencies — one table, looked up at layout
-// build time. Missing keys fall back to English, then to the key itself.
-// Note: layout stays left-to-right in all languages (Arabic text renders
-// RTL at the text level, but the form is not mirrored).
+// Spanish) and Russian. No .resx, no new dependencies — one table, looked
+// up at layout build time. Missing keys fall back to English, then to the
+// key itself. Flag pictures come from FlagImages.cs (bundled PNGs), not
+// from here — Windows has no flag glyphs. Note: layout stays left-to-right
+// in all languages (Arabic text renders RTL at the text level, but the form
+// is not mirrored).
 
 using System.Globalization;
 
@@ -12,19 +14,17 @@ namespace KikitanTranslator.WinForms;
 
 public static class UiLanguage
 {
-    // Flag is the regional-indicator emoji for the language's most
-    // associated country (US for English, Saudi Arabia for Arabic — no
-    // single flag exists for a language). Note: Windows has no flag
-    // glyphs, so these render as the two-letter code ("KR", "JP") rather
-    // than a picture; the native name next to it carries the meaning.
-    public static readonly (string Code, string NativeName, string Flag)[] Supported =
+    // The flag file per language lives in FlagImages.cs (us for English,
+    // sa for Arabic — no single flag exists for a language).
+    public static readonly (string Code, string NativeName)[] Supported =
     [
-        ("en", "English", "🇺🇸"),
-        ("ko", "한국어", "🇰🇷"),
-        ("ja", "日本語", "🇯🇵"),
-        ("zh", "中文", "🇨🇳"),
-        ("ar", "العربية", "🇸🇦"),
-        ("es", "Español", "🇪🇸"),
+        ("en", "English"),
+        ("ko", "한국어"),
+        ("ja", "日本語"),
+        ("zh", "中文"),
+        ("ar", "العربية"),
+        ("es", "Español"),
+        ("ru", "Русский"),
     ];
 
     // The user's Windows display language, when it is one we translate.
@@ -43,9 +43,6 @@ public static class UiLanguage
 
     public static string NativeName(string code)
         => Supported.FirstOrDefault(l => l.Code == code).NativeName ?? "English";
-
-    public static string Flag(string code)
-        => Supported.FirstOrDefault(l => l.Code == code).Flag ?? "";
 
     // First-run source language for a UI language. The Source list has no
     // plain "es" (Spanish is regional there), so Spanish gets es-ES.
@@ -423,6 +420,66 @@ public static class UiLanguage
             ["Update downloaded"] = "Actualización descargada",
             ["Left hand"] = "Mano izquierda",
             ["Right hand"] = "Mano derecha",
+        },
+        ["ru"] = new()
+        {
+            ["Main"] = "Главная",
+            ["Settings"] = "Настройки",
+            ["Control"] = "Управление",
+            ["Send text"] = "Отправить текст",
+            ["Languages"] = "Языки",
+            ["Display"] = "Отображение",
+            ["Speech"] = "Речь",
+            ["VRChat"] = "VRChat",
+            ["API keys"] = "API-ключи",
+            ["Overlay"] = "Оверлей",
+            ["Start"] = "Запуск",
+            ["Stop"] = "Стоп",
+            ["Clear feed"] = "Очистить ленту",
+            ["Restart to update"] = "Перезапустить для обновления",
+            ["Send"] = "Отправить",
+            ["Refresh"] = "Обновить",
+            ["Log size:"] = "Размер журнала:",
+            ["UI size %:"] = "Размер UI %:",
+            ["From:"] = "С языка:",
+            ["To:"] = "На язык:",
+            ["Recognizer:"] = "Распознавание:",
+            ["Translator:"] = "Переводчик:",
+            ["Mic:"] = "Микрофон:",
+            ["Groq:"] = "Groq:",
+            ["Gemini:"] = "Gemini:",
+            ["Anchor:"] = "Якорь:",
+            ["Max entries:"] = "Макс. записей:",
+            ["Font size:"] = "Размер шрифта:",
+            ["Width (cm):"] = "Ширина (см):",
+            ["Opacity %:"] = "Непрозрачность %:",
+            ["Display sec (0=always):"] = "Показ, сек (0=всегда):",
+            ["Fadeout sec:"] = "Затухание, сек:",
+            ["Pos X (m):"] = "Поз. X (м):",
+            ["Pos Y (m):"] = "Поз. Y (м):",
+            ["Pos Z (m):"] = "Поз. Z (м):",
+            ["Show transcription"] = "Показывать транскрипцию",
+            ["Translate my speech"] = "Переводить мою речь",
+            ["Translate incoming speech"] = "Переводить входящую речь",
+            ["Transcription only (no translation)"] = "Только транскрипция (без перевода)",
+            ["Send to chatbox"] = "Отправлять в чатбокс",
+            ["Translation only (no original)"] = "Только перевод (без оригинала)",
+            ["Send without waiting for finish"] = "Отправлять, не дожидаясь завершения",
+            ["Disable when muted"] = "Отключать при mute",
+            ["Send user data (OSC)"] = "Отправлять данные пользователя (OSC)",
+            ["Desktop overlay"] = "Десктопный оверлей",
+            ["Show original text"] = "Показывать исходный текст",
+            ["Show own mic in feed"] = "Показывать мой микрофон в ленте",
+            ["Stopped"] = "Остановлено",
+            ["Running"] = "Работает",
+            ["Translator unavailable: check API key"] = "Переводчик недоступен: проверьте API-ключ",
+            ["Translation failed"] = "Перевод не удался",
+            ["MUTED"] = "ЗАГЛУШЕН",
+            ["UI size {0}% applied"] = "Размер UI {0}% применён",
+            ["Downloading update..."] = "Загрузка обновления...",
+            ["Update downloaded"] = "Обновление загружено",
+            ["Left hand"] = "Левая рука",
+            ["Right hand"] = "Правая рука",
         },
     };
 }

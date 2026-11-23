@@ -28,6 +28,14 @@
     </ItemGroup>
 
     <ItemGroup>
+        <!-- FORK (feed-overlay): bundled flag images for the UI language
+             button/menu (flagcdn.com renders of lipis/flag-icons, MIT —
+             see Resources/flags/LICENSE.txt). Embedded, so the portable
+             zip gains no extra files. -->
+        <EmbeddedResource Include="Resources\flags\*.png" />
+    </ItemGroup>
+
+    <ItemGroup>
         <!-- Silero VAD model, shared with the upstream Photino host. -->
         <Content Include="..\KikitanTranslator.Photino\Resources\wwwroot\silero_vad.onnx">
             <Link>silero_vad.onnx</Link>
