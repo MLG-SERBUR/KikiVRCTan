@@ -26,8 +26,9 @@ and a native Windows UI, without touching the speech/translation backend.
 - `MainForm.cs` — settings UI (languages, recognizer/translator, mic,
   VRChat/chatbox options, API keys, overlay settings) bound to the shared
   `AppConfig` (`%APPDATA%/Kikitan Translator/config.json`, same file as
-  upstream), plus a live feed list. Two tabs: Main (Start/Stop, Send text,
-  target-language quick buttons) and Settings (everything else). The quick
+  upstream), plus a live feed list. Two tabs: Main (Start/Stop, Send text
+  + the Send to chatbox toggle, target-language quick buttons) and Settings
+  (everything else). The quick
   buttons switch the target language in one tap — Korean, Japanese,
   Chinese, Arabic, Spanish, in that order — through the same path as the
   To dropdown, with the active one bolded. A dropdown never changes on

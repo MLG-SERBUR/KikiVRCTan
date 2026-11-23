@@ -113,8 +113,9 @@ public sealed class MainForm : Form
         Controls.Add(split);
 
         // FORK: two tabs — Main is the clean talking interface (Control,
-        // Send text, target-language buttons); Settings holds everything
-        // else. The feed stays visible on the right at all times.
+        // Send text + chatbox toggle, target-language buttons); Settings
+        // holds everything else. The feed stays visible on the right at all
+        // times.
         var tabs = new TabControl { Dock = DockStyle.Fill };
         split.Panel1.Controls.Add(tabs);
         var main = new FlowLayoutPanel
@@ -174,6 +175,9 @@ public sealed class MainForm : Form
             send.Click += (_, _) => SendManualText();
             c.Controls.Add(_manualBox);
             c.Controls.Add(send);
+            // FORK: the chatbox toggle lives here on Main, not in Settings
+            // — both the send box and the mic feed the chatbox through it.
+            c.Controls.Add(Check(T("Send to chatbox"), v => _cfg.SendToChatbox = v, () => _cfg.SendToChatbox));
         }));
 
         main.Controls.Add(Group(T("Languages"), c =>
@@ -217,7 +221,6 @@ public sealed class MainForm : Form
 
         settings.Controls.Add(Group(T("VRChat"), c =>
         {
-            c.Controls.Add(Check(T("Send to chatbox"), v => _cfg.SendToChatbox = v, () => _cfg.SendToChatbox));
             c.Controls.Add(Check(T("Translation only (no original)"), v => _cfg.TranslationOnly = v, () => _cfg.TranslationOnly));
             c.Controls.Add(Check(T("Send without waiting for finish"), v => _cfg.SendWithoutWaitingForFinish = v, () => _cfg.SendWithoutWaitingForFinish));
             c.Controls.Add(Check(T("Disable when muted"), v => _cfg.DisableWhenMuted = v, () => _cfg.DisableWhenMuted));
