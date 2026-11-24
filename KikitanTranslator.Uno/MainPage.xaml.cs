@@ -53,6 +53,7 @@ public sealed partial class MainPage : Page
     private string _lastStatus = "Stopped";
     private double _uiFactor = 1;
     private double _settingsWidth = 320;
+    private bool _settingsCollapsed = false;
     private bool _loading = true;
     private bool _stickToBottom = true;
     private MenuFlyout? _langMenu;
@@ -130,8 +131,25 @@ public sealed partial class MainPage : Page
 
     private void SplitterThumb_DragDelta(object sender, DragDeltaEventArgs e)
     {
+        // Dragging the strip re-opens a collapsed settings column.
+        if (_settingsCollapsed) SetSettingsCollapsed(false);
         _settingsWidth = Math.Clamp(_settingsWidth + e.HorizontalChange, 200, 600);
         SettingsColumn.Width = new GridLength(_settingsWidth);
+    }
+
+    // FORK: hide/show button on the divider (VRCT-style) — collapses the
+    // settings column so the feed takes the whole window, and back. The
+    // strip stays 20px wide at the left edge, so the button stays reachable
+    // by touch to bring the settings back.
+    private void CollapseButton_Click(object sender, RoutedEventArgs e) =>
+        SetSettingsCollapsed(!_settingsCollapsed);
+
+    private void SetSettingsCollapsed(bool collapsed)
+    {
+        _settingsCollapsed = collapsed;
+        Tabs.Visibility = collapsed ? Visibility.Collapsed : Visibility.Visible;
+        SettingsColumn.Width = new GridLength(collapsed ? 0 : _settingsWidth);
+        CollapseGlyph.Text = collapsed ? "›" : "‹";
     }
 
     // FORK: UI-language switcher — a button showing the current language
@@ -161,7 +179,11 @@ public sealed partial class MainPage : Page
     private void ApplyUiLanguage()
     {
         TabMain.Header = T("Main");
-        TabSettings.Header = T("Settings");
+        TabVoice.Header = T("Voice");
+        TabVrChat.Header = T("VRChat");
+        TabOverlay.Header = T("Overlay");
+        TabApiKeys.Header = T("API keys");
+        TabDisplay.Header = T("Display");
         ControlGroupHeader.Text = T("Control");
         SendTextGroupHeader.Text = T("Send text");
         LanguagesGroupHeader.Text = T("Languages");
@@ -182,7 +204,7 @@ public sealed partial class MainPage : Page
         LangFlag.Source = FlagImages.Get(_uiLang);
 
         FromMainLabel.Text = T("From:");
-        FromSettingsLabel.Text = T("From:");
+        FromVoiceLabel.Text = T("From:");
         ToLabel.Text = T("To:");
         RecognizerLabel.Text = T("Recognizer:");
         TranslatorLabel.Text = T("Translator:");

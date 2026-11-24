@@ -32,9 +32,13 @@ the `KikitanTranslator.WinForms` project is deleted.
   upstream), plus a live feed list: a virtualized `ItemsRepeater` with one
   entry per message (timestamp + speaker + transcription/translation lines,
   incoming blue, own mic green), auto-scrolling while pinned to the end.
-  Two tabs: Main (Start/Stop, Send text
-  + the Send to chatbox toggle, target-language quick buttons) and Settings
-  (everything else). The quick
+  A ‹/› button on the divider collapses the settings column so the feed
+  takes the whole window (and back); the 20px strip stays grabbable by
+  touch, and dragging it re-opens the settings.
+  Six tabs: Main (Start/Stop, Send text
+  + the Send to chatbox toggle, target-language quick buttons), Voice
+  (speech: From/To/recognizer/translator/mic), VRChat, Overlay, API keys,
+  and Display. The quick
   buttons switch the target language in one tap — Korean, Japanese,
   Chinese, Arabic, Spanish, in that order — through the same path as the
   To dropdown, with the active one bolded. A dropdown never changes on
@@ -50,7 +54,7 @@ the `KikitanTranslator.WinForms` project is deleted.
   `FlagImages.cs`), flat 4:3 renders of lipis/flag-icons via flagcdn.com, MIT (license
   in `Assets/flags/LICENSE.txt`); Arabic uses the Saudi flag as the
   conventional stand-in. Saved as `ui_language`, empty means follow Windows. The From dropdown is on Main too, synced with
-  the one in Settings, and on a true first run it defaults to the UI
+  the one in Voice, and on a true first run it defaults to the UI
   language (Spanish maps to es-ES, the Source list has no plain "es").
   Layout stays left-to-right in all languages; changing the UI language
   restarts the engine like any other setting change. The Send text box translates typed text

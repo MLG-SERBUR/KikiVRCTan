@@ -41,7 +41,7 @@
         </Grid.RenderTransform>
         <Grid.ColumnDefinitions>
             <ColumnDefinition x:Name="SettingsColumn" Width="320" />
-            <ColumnDefinition Width="4" />
+            <ColumnDefinition Width="20" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
@@ -53,8 +53,8 @@
                             <StackPanel>
                                 <TextBlock x:Name="ControlGroupHeader" Style="{StaticResource GroupHeaderStyle}" Text="Control" />
                                 <VariableSizedWrapGrid Orientation="Horizontal">
-                                    <Button x:Name="StartStopButton" Content="Start" Width="90" Height="28" Margin="0,0,6,6" Click="StartStopButton_Click" />
-                                    <Button x:Name="ClearFeedButton" Content="Clear feed" Width="90" Height="28" Margin="0,0,6,6" Click="ClearFeedButton_Click" />
+                                    <Button x:Name="StartStopButton" Content="Start" Height="28" MinWidth="90" Padding="12,0" Margin="0,0,6,6" Click="StartStopButton_Click" />
+                                    <Button x:Name="ClearFeedButton" Content="Clear feed" Height="28" MinWidth="90" Padding="12,0" Margin="0,0,6,6" Click="ClearFeedButton_Click" />
                                     <Button x:Name="LangButton" Height="28" Margin="0,0,6,6" Click="LangButton_Click">
                                         <StackPanel Orientation="Horizontal" Spacing="6">
                                             <Image x:Name="LangFlag" Width="24" Height="18" Stretch="Uniform" />
@@ -64,7 +64,7 @@
                                 </VariableSizedWrapGrid>
                                 <TextBlock x:Name="StatusText" Text="Stopped" Margin="0,6,0,0" />
                                 <TextBlock x:Name="MutedText" Foreground="{ThemeResource SystemFillColorCriticalBrush}" Margin="0,2,0,0" />
-                                <Button x:Name="UpdateButton" Content="Restart to update" Width="130" Height="28" Margin="0,6,0,0"
+                                <Button x:Name="UpdateButton" Content="Restart to update" Height="28" MinWidth="130" Padding="12,0" Margin="0,6,0,0"
                                         Visibility="Collapsed" Click="UpdateButton_Click" />
                             </StackPanel>
                         </Border>
@@ -78,7 +78,7 @@
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
                                     <TextBox x:Name="ManualBox" KeyDown="ManualBox_KeyDown" TextChanged="ManualBox_TextChanged" />
-                                    <Button x:Name="SendButton" Grid.Column="1" Content="Send" Width="90" Height="28" Margin="6,0,0,0" Click="SendButton_Click" />
+                                    <Button x:Name="SendButton" Grid.Column="1" Content="Send" Height="28" MinWidth="90" Padding="12,0" Margin="6,0,0,0" Click="SendButton_Click" />
                                 </Grid>
                                 <CheckBox x:Name="SendToChatboxBox" Content="Send to chatbox" Margin="0,6,0,0" />
                             </StackPanel>
@@ -109,33 +109,9 @@
                 </ScrollViewer>
             </TabViewItem>
 
-            <TabViewItem x:Name="TabSettings" Header="Settings" IsClosable="False">
+            <TabViewItem x:Name="TabVoice" Header="Voice" IsClosable="False">
                 <ScrollViewer>
                     <StackPanel Padding="8">
-                        <Border Style="{StaticResource GroupBorderStyle}">
-                            <StackPanel>
-                                <TextBlock x:Name="DisplayGroupHeader" Style="{StaticResource GroupHeaderStyle}" Text="Display" />
-                                <Grid Margin="0,0,0,6">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="100" />
-                                        <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock x:Name="LogSizeLabel" Text="Log size:" VerticalAlignment="Center" />
-                                    <NumberBox x:Name="LogSizeBox" Grid.Column="1" Minimum="8" Maximum="24" SmallChange="1"
-                                               SpinButtonPlacementMode="Inline" />
-                                </Grid>
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="100" />
-                                        <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock x:Name="UiSizeLabel" Text="UI size %:" VerticalAlignment="Center" />
-                                    <NumberBox x:Name="UiScaleBox" Grid.Column="1" Minimum="80" Maximum="250" SmallChange="10"
-                                               SpinButtonPlacementMode="Inline" />
-                                </Grid>
-                            </StackPanel>
-                        </Border>
-
                         <Border Style="{StaticResource GroupBorderStyle}">
                             <StackPanel>
                                 <TextBlock x:Name="SpeechGroupHeader" Style="{StaticResource GroupHeaderStyle}" Text="Speech" />
@@ -144,7 +120,7 @@
                                         <ColumnDefinition Width="100" />
                                         <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock x:Name="FromSettingsLabel" Text="From:" VerticalAlignment="Center" />
+                                    <TextBlock x:Name="FromVoiceLabel" Text="From:" VerticalAlignment="Center" />
                                     <ComboBox x:Name="FromComboSettings" Grid.Column="1" HorizontalAlignment="Stretch"
                                               DisplayMemberPath="Name" PointerWheelChanged="ComboBox_PointerWheelChanged" />
                                 </Grid>
@@ -198,7 +174,13 @@
                                 <CheckBox x:Name="TranscriptionOnlyBox" Content="Transcription only (no translation)" />
                             </StackPanel>
                         </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabViewItem>
 
+            <TabViewItem x:Name="TabVrChat" Header="VRChat" IsClosable="False">
+                <ScrollViewer>
+                    <StackPanel Padding="8">
                         <Border Style="{StaticResource GroupBorderStyle}">
                             <StackPanel>
                                 <TextBlock x:Name="VrChatGroupHeader" Style="{StaticResource GroupHeaderStyle}" Text="VRChat" />
@@ -208,29 +190,13 @@
                                 <CheckBox x:Name="SendUserDataBox" Content="Send user data (OSC)" />
                             </StackPanel>
                         </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabViewItem>
 
-                        <Border Style="{StaticResource GroupBorderStyle}">
-                            <StackPanel>
-                                <TextBlock x:Name="ApiKeysGroupHeader" Style="{StaticResource GroupHeaderStyle}" Text="API keys" />
-                                <Grid Margin="0,0,0,6">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="100" />
-                                        <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock x:Name="GroqLabel" Text="Groq:" VerticalAlignment="Center" />
-                                    <PasswordBox x:Name="GroqKeyBox" Grid.Column="1" />
-                                </Grid>
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="100" />
-                                        <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock x:Name="GeminiLabel" Text="Gemini:" VerticalAlignment="Center" />
-                                    <PasswordBox x:Name="GeminiKeyBox" Grid.Column="1" />
-                                </Grid>
-                            </StackPanel>
-                        </Border>
-
+            <TabViewItem x:Name="TabOverlay" Header="Overlay" IsClosable="False">
+                <ScrollViewer>
+                    <StackPanel Padding="8">
                         <Border Style="{StaticResource GroupBorderStyle}">
                             <StackPanel>
                                 <TextBlock x:Name="OverlayGroupHeader" Style="{StaticResource GroupHeaderStyle}" Text="Overlay" />
@@ -338,13 +304,76 @@
                     </StackPanel>
                 </ScrollViewer>
             </TabViewItem>
+
+            <TabViewItem x:Name="TabApiKeys" Header="API keys" IsClosable="False">
+                <ScrollViewer>
+                    <StackPanel Padding="8">
+                        <Border Style="{StaticResource GroupBorderStyle}">
+                            <StackPanel>
+                                <TextBlock x:Name="ApiKeysGroupHeader" Style="{StaticResource GroupHeaderStyle}" Text="API keys" />
+                                <Grid Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock x:Name="GroqLabel" Text="Groq:" VerticalAlignment="Center" />
+                                    <PasswordBox x:Name="GroqKeyBox" Grid.Column="1" />
+                                </Grid>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock x:Name="GeminiLabel" Text="Gemini:" VerticalAlignment="Center" />
+                                    <PasswordBox x:Name="GeminiKeyBox" Grid.Column="1" />
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabViewItem>
+
+            <TabViewItem x:Name="TabDisplay" Header="Display" IsClosable="False">
+                <ScrollViewer>
+                    <StackPanel Padding="8">
+                        <Border Style="{StaticResource GroupBorderStyle}">
+                            <StackPanel>
+                                <TextBlock x:Name="DisplayGroupHeader" Style="{StaticResource GroupHeaderStyle}" Text="Display" />
+                                <Grid Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock x:Name="LogSizeLabel" Text="Log size:" VerticalAlignment="Center" />
+                                    <NumberBox x:Name="LogSizeBox" Grid.Column="1" Minimum="8" Maximum="24" SmallChange="1"
+                                               SpinButtonPlacementMode="Inline" />
+                                </Grid>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock x:Name="UiSizeLabel" Text="UI size %:" VerticalAlignment="Center" />
+                                    <NumberBox x:Name="UiScaleBox" Grid.Column="1" Minimum="80" Maximum="250" SmallChange="10"
+                                               SpinButtonPlacementMode="Inline" />
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabViewItem>
         </TabView>
 
         <!-- Splitter between the settings tabs and the feed. WinUI has no
              GridSplitter, so a Thumb drives the settings column width. -->
-        <Grid Grid.Column="1" Background="{ThemeResource CardStrokeColorDefaultBrush}">
+        <Grid Grid.Column="1">
             <Thumb x:Name="SplitterThumb" DragDelta="SplitterThumb_DragDelta" Background="Transparent"
                    HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+            <Border Width="1" HorizontalAlignment="Center" Background="{ThemeResource CardStrokeColorDefaultBrush}" />
+            <Button x:Name="CollapseButton" Width="20" Height="56" HorizontalAlignment="Center" VerticalAlignment="Center"
+                    Background="Transparent" BorderThickness="0" Padding="0" Click="CollapseButton_Click">
+                <TextBlock x:Name="CollapseGlyph" Text="‹" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Button>
         </Grid>
 
         <ScrollViewer x:Name="FeedScroll" Grid.Column="2" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
