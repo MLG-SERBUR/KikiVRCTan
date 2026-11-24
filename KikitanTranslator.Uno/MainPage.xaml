@@ -38,9 +38,9 @@
             <ColumnDefinition x:Name="FeedColumn" Width="*" />
         </Grid.ColumnDefinitions>
 
-        <ScrollViewer Grid.Column="0">
+        <ScrollViewer Grid.Column="0" HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled">
             <StackPanel Padding="8">
-            <Expander Margin="0,0,0,8" IsExpanded="True">
+            <Expander HorizontalAlignment="Stretch" Margin="0,0,0,8" IsExpanded="True">
                 <Expander.Header>
                     <TextBlock x:Name="ControlGroupHeader" FontWeight="SemiBold" Text="Control" />
                 </Expander.Header>
@@ -76,7 +76,7 @@
                             Visibility="Collapsed" Click="UpdateButton_Click" />
                 </StackPanel>
             </Expander>
-            <Expander Margin="0,0,0,8" IsExpanded="True">
+            <Expander HorizontalAlignment="Stretch" Margin="0,0,0,8" IsExpanded="True">
                 <Expander.Header>
                     <TextBlock x:Name="SendTextGroupHeader" FontWeight="SemiBold" Text="Send text" />
                 </Expander.Header>
@@ -93,7 +93,7 @@
                     <CheckBox x:Name="SendToChatboxBox" Content="Send to chatbox" Margin="0,6,0,0" />
                 </StackPanel>
             </Expander>
-            <Expander Margin="0,0,0,8" IsExpanded="True">
+            <Expander HorizontalAlignment="Stretch" Margin="0,0,0,8" IsExpanded="True">
                 <Expander.Header>
                     <TextBlock x:Name="LanguagesGroupHeader" FontWeight="SemiBold" Text="Languages" />
                 </Expander.Header>
@@ -130,7 +130,7 @@
                     </Grid>
                 </StackPanel>
             </Expander>
-            <Expander Margin="0,0,0,8">
+            <Expander HorizontalAlignment="Stretch" Margin="0,0,0,8">
                 <Expander.Header>
                     <TextBlock x:Name="VoiceGroupHeader" FontWeight="SemiBold" Text="Voice" />
                 </Expander.Header>
@@ -195,7 +195,7 @@
                     <CheckBox x:Name="TranscriptionOnlyBox" Content="Transcription only (no translation)" />
                 </StackPanel>
             </Expander>
-            <Expander Margin="0,0,0,8">
+            <Expander HorizontalAlignment="Stretch" Margin="0,0,0,8">
                 <Expander.Header>
                     <TextBlock x:Name="VrChatGroupHeader" FontWeight="SemiBold" Text="VRChat" />
                 </Expander.Header>
@@ -206,7 +206,7 @@
                     <CheckBox x:Name="SendUserDataBox" Content="Send user data (OSC)" />
                 </StackPanel>
             </Expander>
-            <Expander Margin="0,0,0,8">
+            <Expander HorizontalAlignment="Stretch" Margin="0,0,0,8">
                 <Expander.Header>
                     <TextBlock x:Name="OverlayGroupHeader" FontWeight="SemiBold" Text="Overlay" />
                 </Expander.Header>
@@ -312,7 +312,7 @@
                     </Grid>
                 </StackPanel>
             </Expander>
-            <Expander Margin="0,0,0,8">
+            <Expander HorizontalAlignment="Stretch" Margin="0,0,0,8">
                 <Expander.Header>
                     <TextBlock x:Name="ApiKeysGroupHeader" FontWeight="SemiBold" Text="API keys" />
                 </Expander.Header>
@@ -335,7 +335,7 @@
                     </Grid>
                 </StackPanel>
             </Expander>
-            <Expander Margin="0,0,0,8">
+            <Expander HorizontalAlignment="Stretch" Margin="0,0,0,8">
                 <Expander.Header>
                     <TextBlock x:Name="DisplayGroupHeader" FontWeight="SemiBold" Text="Display" />
                 </Expander.Header>
@@ -371,12 +371,15 @@
             <Thumb x:Name="SplitterThumb" DragDelta="SplitterThumb_DragDelta" Background="Transparent"
                    HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
             <Border Width="1" HorizontalAlignment="Center" Background="{ThemeResource CardStrokeColorDefaultBrush}" />
-            <Button x:Name="CollapseButton" Width="20" Height="56" HorizontalAlignment="Center" VerticalAlignment="Center"
-                    Background="Transparent" BorderThickness="0" Padding="0"
+            <!-- Plain Border, not a Button: a Button marks PointerPressed
+                 handled for its own click handling, so the handlers below
+                 never fired and the button ate the drag too. -->
+            <Border x:Name="CollapseButton" Width="20" Height="56" HorizontalAlignment="Center" VerticalAlignment="Center"
+                    Background="Transparent"
                     PointerPressed="CollapseButton_PointerPressed" PointerMoved="CollapseButton_PointerMoved"
                     PointerReleased="CollapseButton_PointerReleased" PointerCanceled="CollapseButton_PointerCanceled">
                 <TextBlock x:Name="CollapseGlyph" Text="›" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center" />
-            </Button>
+            </Border>
         </Grid>
 
         <ScrollViewer x:Name="FeedScroll" Grid.Column="2" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">

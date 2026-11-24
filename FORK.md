@@ -32,10 +32,12 @@ the `KikitanTranslator.WinForms` project is deleted.
   upstream), plus a live feed list: a virtualized `ItemsRepeater` with one
   entry per message (timestamp + speaker + transcription/translation lines,
   incoming blue, own mic green), auto-scrolling while pinned to the end.
-  A ›/‹ button on the divider hides the feed (the log) so the settings
-  take the whole window (and back). The button is also the drag handle:
-  press and drag it to resize the settings column, tap it to hide/show
-  the log; the 20px strip stays grabbable by touch either way.
+  A ›/‹ chevron on the divider hides the feed (the log) so the settings
+  take the whole window (and back). The chevron is a plain element, not a
+  Button — a Button swallows PointerPressed for its own click handling,
+  which killed both the tap and the drag. Press and drag it to resize the
+  settings column, tap it to hide/show the log; the 20px strip stays
+  grabbable by touch either way.
   One scrolling page of VRCT-style collapsible sections instead of tabs:
   Control (Start/Stop, Send text + the Send to chatbox toggle),
   Languages (target-language quick buttons), Voice (speech:
