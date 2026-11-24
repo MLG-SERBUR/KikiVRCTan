@@ -594,8 +594,8 @@ public class ConfigObject : INotifyPropertyChanged
             }
         }
     }
-    // FORK: WinForms UI scale percent for touch/VR use. 100 = current size.
-    // Applied live by MainForm; no restart needed.
+    // FORK: Uno UI scale percent for touch/VR use. 100 = current size.
+    // Applied live by MainPage; no restart needed.
     [JsonProperty("ui_scale")] private int _uiScale = 100;
 
     [JsonIgnore]
@@ -612,8 +612,8 @@ public class ConfigObject : INotifyPropertyChanged
             }
         }
     }
-    // FORK: WinForms UI language code (en/ko/ja/zh/ar/es). "" means never
-    // chosen — MainForm follows the Windows display language instead.
+    // FORK: Uno UI language code (en/ko/ja/zh/ar/es). "" means never
+    // chosen — MainPage follows the Windows display language instead.
     [JsonProperty("ui_language")] private string _uiLanguage = "";
 
     [JsonIgnore]
@@ -646,7 +646,7 @@ public static class AppConfig
     private static string _currentConfigPath;
 
     // FORK: when true, app data (config.json, logs) lives next to the executable
-    // instead of %APPDATA%. The WinForms host sets this; upstream hosts keep default.
+    // instead of %APPDATA%. The Uno host sets this; upstream hosts keep default.
     public static bool UseExecutableDirectory { get; set; }
 
     public static string GetLegacyAppFolder()
