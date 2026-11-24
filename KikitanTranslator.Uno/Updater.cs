@@ -12,7 +12,7 @@ namespace KikitanTranslator.Uno;
 
 public sealed class Updater
 {
-    private const string ReleaseBase = "https://github.com/MLG-SERBUR/kikitan-translator/releases/download/feed-overlay-latest";
+    private const string ReleaseBase = "https://github.com/MLG-SERBUR/KikiVRCTan/releases/download/feed-overlay-latest";
     private const string ZipName = "KikiVRCTan-portable.zip";
     private const string AppExe = "KikiVRCTan.exe";
 
