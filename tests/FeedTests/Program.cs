@@ -3,7 +3,7 @@
 // with FeedRenderer.DrawFeedOnCanvas for visual inspection.
 
 using KikitanTranslator.Overlay;
-using KikitanTranslator.WinForms;
+using KikitanTranslator.Uno;
 
 var failures = new List<string>();
 void Check(bool cond, string name)
