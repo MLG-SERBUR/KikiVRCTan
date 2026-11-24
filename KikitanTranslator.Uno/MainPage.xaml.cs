@@ -224,17 +224,11 @@ public sealed partial class MainPage : Page
 
     private void ApplyUiLanguage()
     {
-        TabMain.Header = T("Main");
-        TabVoice.Header = T("Voice");
-        TabVrChat.Header = T("VRChat");
-        TabOverlay.Header = T("Overlay");
-        TabApiKeys.Header = T("API keys");
-        TabDisplay.Header = T("Display");
         ControlGroupHeader.Text = T("Control");
         SendTextGroupHeader.Text = T("Send text");
         LanguagesGroupHeader.Text = T("Languages");
         DisplayGroupHeader.Text = T("Display");
-        SpeechGroupHeader.Text = T("Speech");
+        VoiceGroupHeader.Text = T("Voice");
         VrChatGroupHeader.Text = T("VRChat");
         ApiKeysGroupHeader.Text = T("API keys");
         OverlayGroupHeader.Text = T("Overlay");
