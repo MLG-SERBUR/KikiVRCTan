@@ -1,0 +1,384 @@
+// FORK (feed-overlay): pipeline orchestration for the native Uno host.
+// Mirrors KikitanTranslator.Photino.Manager (upstream) without the web UI:
+// same recognizers/translators/capture, plus the translation feed and the
+// overlay feed pipe. Base is untouched; the feed is attached as a plain
+// IOutput via Custom.
+
+using System.Diagnostics;
+using KikitanTranslator.Base;
+using KikitanTranslator.Base.Outputs;
+using KikitanTranslator.Base.Recognizers;
+using KikitanTranslator.Base.Translators;
+using KikitanTranslator.Capture;
+using KikitanTranslator.Recognizers;
+using KikitanTranslator.Utility;
+using Serilog;
+using SoundFlow.Backends.MiniAudio;
+using SoundFlow.Backends.MiniAudio.Enums;
+using SoundFlow.Structs;
+
+namespace KikitanTranslator.Uno;
+
+public sealed class AppEngine : IDisposable
+{
+    public TranslationFeed Feed { get; } = new();
+
+    public event Action<string>? StatusChanged;
+    public event Action<bool>? MuteChanged;
+
+    private Kikitan? _microphoneKikitan;
+    private Kikitan? _desktopKikitan;
+    private ITranslator? _translator;
+    private Microphone? _mic;
+    private Loopback? _loopback;
+    private FeedPipeWriter? _feedWriter;
+    private OscWatcher? _oscWatcher;
+    private Chatbox? _manualChatbox;
+
+    private bool _running;
+    private bool _isMuted;
+    private bool _disposed;
+    private System.Threading.Timer? _restartDebounce;
+
+    public bool IsRunning => _running;
+    public bool IsMuted => _isMuted;
+
+    public DeviceInfo[] GetMicrophones()
+    {
+        var engine = new MiniAudioEngine(backendPriority: [MiniAudioBackend.Wasapi, MiniAudioBackend.Oss]);
+        engine.UpdateAudioDevicesInfo();
+        return engine.CaptureDevices;
+    }
+
+    public void Initialize()
+    {
+        var silero = Path.Combine(AppContext.BaseDirectory, "silero_vad.onnx");
+        var errorHandler = new WinErrorHandler(msg => StatusChanged?.Invoke(msg));
+
+        _mic = new Microphone(silero, errorHandler);
+        _loopback = new Loopback(silero);
+
+        _oscWatcher = new OscWatcher();
+        _oscWatcher.MuteStatusChanged += muted =>
+        {
+            _isMuted = muted;
+            MuteChanged?.Invoke(muted);
+        };
+        _oscWatcher.Start();
+
+        // FORK: only incoming entries wake the overlay. Own-mic entries used
+        // to trigger a pipe write (and overlay.Show()) with nothing new in it.
+        Feed.EntryAdded += e => { if (e.FromDesktop) PushFeedToOverlay(); };
+        AppConfig.OnUpdate += OnConfigUpdated;
+
+        try
+        {
+            _feedWriter = new FeedPipeWriter();
+            PushFeedToOverlay();
+        }
+        catch (Exception e)
+        {
+            Log.Warning(e, "[FORK] Overlay feed pipe unavailable; overlay will not receive the feed");
+        }
+
+        LaunchOverlay();
+        WatchMicrophone();
+    }
+
+    private void LaunchOverlay()
+    {
+        var overlayExe = Path.Combine(AppContext.BaseDirectory, "KikitanTranslator.Overlay.exe");
+        if (!File.Exists(overlayExe))
+        {
+            Log.Warning("[FORK] KikitanTranslator.Overlay.exe not found next to the app; overlay disabled");
+            return;
+        }
+
+        try
+        {
+            Process.Start(new ProcessStartInfo(overlayExe) { CreateNoWindow = true, UseShellExecute = false });
+            Log.Information("[FORK] Overlay process launched");
+        }
+        catch (Exception e)
+        {
+            Log.Warning(e, "[FORK] Failed to launch overlay process");
+        }
+    }
+
+    private void WatchMicrophone()
+    {
+        Task.Run(async () =>
+        {
+            while (!_disposed)
+            {
+                await Task.Delay(5000);
+                if (_disposed) break;
+
+                try
+                {
+                    var configured = AppConfig.ConfigObject.Microphone;
+                    if (configured.Length == 0) continue;
+
+                    var engine = new MiniAudioEngine(backendPriority: [MiniAudioBackend.Wasapi, MiniAudioBackend.Oss]);
+                    engine.UpdateAudioDevicesInfo();
+                    if (engine.CaptureDevices.Any(d => d.Name == configured)) continue;
+
+                    var devices = engine.CaptureDevices.ToList();
+                    if (devices.Count == 0) continue;
+
+                    var fallback = devices.FirstOrDefault(d => d.IsDefault);
+                    if (fallback.Name == null) fallback = devices[0];
+
+                    Log.Warning("[FORK] Configured mic gone; falling back to {Mic}", fallback.Name);
+                    AppConfig.ConfigObject.Microphone = fallback.Name;
+                }
+                catch (Exception e)
+                {
+                    Log.Debug(e, "[FORK] Mic watch tick failed");
+                }
+            }
+        });
+    }
+
+    private void OnConfigUpdated()
+    {
+        // Debounce: a trackbar drag fires many updates; restart once it settles.
+        _restartDebounce?.Dispose();
+        _restartDebounce = new System.Threading.Timer(_ =>
+        {
+            PushFeedToOverlay(); // overlay-only settings apply without restart
+            if (_running) RestartIfRunning();
+        }, null, 600, Timeout.Infinite);
+    }
+
+    private FeedPipeConfigDto CurrentOverlayConfig() => new()
+    {
+        MaxEntries = AppConfig.ConfigObject.OverlayMaxEntries,
+        FontSize = AppConfig.ConfigObject.OverlayFontSize,
+        Opacity = AppConfig.ConfigObject.OverlayOpacity,
+        Anchor = AppConfig.ConfigObject.OverlayAnchor,
+        WidthCm = AppConfig.ConfigObject.OverlayWidthCm,
+        // FORK: overlay messages carry no timestamp (log feed still has them).
+        ShowTimestamps = false,
+        DesktopOverlay = AppConfig.ConfigObject.DesktopOverlayEnabled,
+        DisplayDurationSec = AppConfig.ConfigObject.OverlayDisplayDurationSec,
+        FadeoutDurationSec = AppConfig.ConfigObject.OverlayFadeoutDurationSec,
+        PosX = AppConfig.ConfigObject.OverlayPosX,
+        PosY = AppConfig.ConfigObject.OverlayPosY,
+        PosZ = AppConfig.ConfigObject.OverlayPosZ,
+        ShowOriginal = AppConfig.ConfigObject.OverlayShowOriginal,
+    };
+
+    private void PushFeedToOverlay()
+    {
+        try
+        {
+            var cfg = AppConfig.ConfigObject;
+            var entries = Feed.GetSnapshot()
+                // FORK: overlay is incoming-only; own mic translations never shown here.
+                .Where(e => e.FromDesktop)
+                .TakeLast(Math.Max(1, cfg.OverlayMaxEntries))
+                .ToArray();
+            _feedWriter?.Write(entries, CurrentOverlayConfig());
+        }
+        catch (Exception e)
+        {
+            Log.Debug(e, "[FORK] Feed pipe write failed");
+        }
+    }
+
+    public void Start()
+    {
+        if (_running) { RestartIfRunning(); return; }
+        if (_mic == null || _loopback == null) return;
+
+        var cfg = AppConfig.ConfigObject;
+        Log.Information("[FORK] Start: recognizer={R} translator={T} mic={M} desktop={D} chatbox={C}",
+            cfg.Recognizer, cfg.Translator, cfg.MicTranslation, cfg.DesktopTranslation, cfg.SendToChatbox);
+
+        _translator = CreateTranslator();
+        if (_translator == null) return;
+
+        var errorHandler = new WinErrorHandler(msg => StatusChanged?.Invoke(msg));
+
+        // FORK: "Translate my speech" off = skip the mic pipeline entirely;
+        // the incoming (desktop) pipeline below still runs.
+        if (cfg.MicTranslation)
+        {
+            IRecognizer rMic = cfg.Recognizer switch
+            {
+                1 => new GroqRecognizer(_mic),
+                2 => new Gemini(_mic),
+                _ => new Bing(_mic),
+            };
+
+            // FORK: speech typing indicator — mic interims drive it via this
+            // callback; desktop (incoming) speech and typed text never do.
+            var chatbox = cfg.SendToChatbox ? new Chatbox() : null;
+            _microphoneKikitan = new Kikitan(rMic, _translator, errorHandler, false,
+                // FORK: when "disable when muted" is on, drop mic input at recognition
+                // time (no transcription/translation). In-flight items already queued
+                // still send, so muting mid-utterance doesn't kill them.
+                () => !(cfg.DisableWhenMuted && _isMuted),
+                chatbox == null ? null : typing => chatbox.SetTyping(typing));
+            // FORK: feed is incoming-only by default (like VRCT); own mic only when enabled.
+            if (cfg.FeedShowOwn)
+                _microphoneKikitan.AddOutput(new Custom((r, t, f) => { if (f) Feed.Add(false, r, t); }, false));
+
+            if (chatbox != null)
+            {
+                // FORK: no mute check here; muting is enforced at recognition time so
+                // in-flight translations still complete.
+                _microphoneKikitan.AddOutput(new Custom((r, t, f) => chatbox.Send(r, t, f), true));
+            }
+
+            if (cfg.SendUserData) _microphoneKikitan.AddOutput(new OSC("/microphone"));
+
+            _microphoneKikitan.Start();
+        }
+
+        if (cfg.DesktopTranslation)
+        {
+            IRecognizer rDesktop = cfg.Recognizer switch
+            {
+                1 => new GroqRecognizer(_loopback),
+                2 => new Gemini(_loopback),
+                _ => new Bing(_loopback),
+            };
+
+            _desktopKikitan = new Kikitan(rDesktop, _translator, errorHandler, true);
+            _desktopKikitan.AddOutput(new Custom((r, t, f) => { if (f) Feed.Add(true, r, t); }, false));
+            if (cfg.SendUserData) _desktopKikitan.AddOutput(new OSC("/desktop"));
+            _desktopKikitan.Start();
+        }
+
+        _running = true;
+        StatusChanged?.Invoke("Running");
+    }
+
+    // FORK: typed text to translate directly. With the mic pipeline running
+    // it goes through Kikitan (same translator, chatbox, feed, and OSC
+    // outputs as speech), bypassing the mute gate, so it works while muted.
+    // Without it — engine stopped, or "Translate my speech" off — it
+    // translates standalone on a background thread and dispatches to the
+    // same outputs directly, so no Start is needed to send text.
+    // Returns false only on blank text; standalone translation runs async,
+    // so true means accepted, not yet sent.
+    public bool ManualTranslate(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return false;
+        text = text.Trim();
+        if (_microphoneKikitan != null)
+        {
+            _microphoneKikitan.ManualTranslate(text);
+            return true;
+        }
+        _ = Task.Run(() => ManualTranslateStandalone(text));
+        return true;
+    }
+
+    private void ManualTranslateStandalone(string text)
+    {
+        var cfg = AppConfig.ConfigObject;
+        string? translated;
+        if (cfg.SpeechToTextOnly)
+        {
+            translated = "";
+        }
+        else
+        {
+            using var translator = CreateTranslator();
+            if (translator == null)
+            {
+                StatusChanged?.Invoke("Translator unavailable: check API key");
+                return;
+            }
+            try
+            {
+                // Mic direction: own text, source -> target.
+                translated = translator.Translate(text, cfg.SourceLanguage, cfg.TargetLanguage);
+            }
+            catch (Exception e)
+            {
+                Log.Error(e, "[FORK] Manual translation failed");
+                StatusChanged?.Invoke("Translation failed");
+                return;
+            }
+        }
+        if (translated == null)
+        {
+            Log.Warning("[FORK] Manual translation returned no result");
+            StatusChanged?.Invoke("Translation failed");
+            return;
+        }
+
+        // Same outputs as the mic pipeline: feed only when opted in, OSC
+        // user data, chatbox (which also clears the typing indicator).
+        if (cfg.FeedShowOwn) Feed.Add(false, text, translated);
+        if (cfg.SendUserData) new OSC("/microphone").Send(text, translated, true);
+        if (cfg.SendToChatbox) ManualChatbox.Send(text, translated, true);
+    }
+
+    // FORK: one chatbox for the manual path (send + typing indicator),
+    // created on demand so neither needs the engine started.
+    private Chatbox ManualChatbox => _manualChatbox ??= new Chatbox();
+
+    // FORK: typing indicator for the Send text box. Plain OSC, so it works
+    // without Start. Gated on SendToChatbox: no chatbox, no indicator.
+    public void SetTyping(bool typing)
+    {
+        if (!AppConfig.ConfigObject.SendToChatbox) return;
+        ManualChatbox.SetTyping(typing);
+    }
+
+    public void Stop()
+    {
+        _microphoneKikitan?.Dispose();
+        _microphoneKikitan = null;
+        _desktopKikitan?.Dispose();
+        _desktopKikitan = null;
+        _running = false;
+        StatusChanged?.Invoke("Stopped");
+    }
+
+    public void RestartIfRunning()
+    {
+        if (!_running) return;
+        Stop();
+        Start();
+    }
+
+    private static ITranslator? CreateTranslator()
+    {
+        var cfg = AppConfig.ConfigObject;
+        if (cfg.Translator == 1)
+        {
+            if (string.IsNullOrEmpty(cfg.GroqApiKey))
+            {
+                Log.Error("[FORK] Groq API key missing");
+                return null;
+            }
+            return new GroqTranslator();
+        }
+        if (cfg.Translator == 2) return new GeminiStub();
+        return new GoogleTranslate();
+    }
+
+    public void Dispose()
+    {
+        _disposed = true;
+        Stop();
+        _restartDebounce?.Dispose();
+        _feedWriter?.Dispose();
+        _oscWatcher?.Dispose();
+    }
+
+    private sealed class WinErrorHandler(Action<string> onError) : IErrorHandler
+    {
+        public void OnError(string message)
+        {
+            Log.Error("[FORK] {Msg}", message);
+            onError(message);
+        }
+    }
+}

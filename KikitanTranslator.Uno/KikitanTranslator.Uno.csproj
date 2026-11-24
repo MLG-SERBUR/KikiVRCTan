@@ -1,0 +1,119 @@
+<Project Sdk="Uno.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net10.0-desktop</TargetFrameworks>
+
+    <!-- FORK (feed-overlay): Uno Platform 7 Skia Desktop host, replacing the
+         WinForms host. Exe name stays KikitanTranslator.exe for the updater
+         and release notes. -->
+    <OutputType>WinExe</OutputType>
+    <AssemblyName>KikitanTranslator</AssemblyName>
+    <RootNamespace>KikitanTranslator.Uno</RootNamespace>
+    <Version>2.1.0</Version>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UnoSingleProject>true</UnoSingleProject>
+
+    <!-- Display name -->
+    <ApplicationTitle>KikiVRCTan</ApplicationTitle>
+    <!-- App Identifier -->
+    <ApplicationId>com.mlgserbur.kikitan</ApplicationId>
+    <!-- Versions -->
+    <ApplicationDisplayVersion>2.1.0</ApplicationDisplayVersion>
+    <ApplicationVersion>1</ApplicationVersion>
+    <!-- Package Publisher -->
+    <ApplicationPublisher>MLG-SERBUR</ApplicationPublisher>
+    <!-- Package Description -->
+    <Description>KikiVRCTan powered by Uno Platform.</Description>
+
+    <!--
+      UnoFeatures are used to quickly add and manage features enabled for your app.
+      https://aka.platform.uno/singleproject-features
+    -->
+    <UnoFeatures>
+      Skia;
+    </UnoFeatures>
+
+    <!-- FORK (feed-overlay): Uno 7 on desktop defaults to the Mono runtime
+         pack for net10.0-desktop, which fails restore with NU1102; the
+         CoreCLR runtime is what this app wants. -->
+    <UseMonoRuntime Condition="'$(TargetFramework)' == 'net10.0-desktop'">false</UseMonoRuntime>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="OscCore" Version="1.0.5" />
+    <PackageReference Include="Serilog" Version="4.3.1" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
+    <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
+    <PackageReference Include="VRChat.OSCQuery" Version="0.0.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\KikitanTranslator.Base\KikitanTranslator.Base.csproj" />
+    <ProjectReference Include="..\KikitanTranslator.Resources\KikitanTranslator.Resources.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- FORK (feed-overlay): bundled flag images for the UI language
+         button/menu (flagcdn.com renders of lipis/flag-icons, MIT —
+         see Assets/flags/LICENSE.txt). Loose Content under Assets/flags/,
+         loaded at runtime via ms-appx URIs; the portable zip gains these
+         small files (Uno has no EmbeddedResource image loading). -->
+    <Content Include="Assets\flags\*.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\flags\LICENSE.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Silero VAD model, shared with the upstream Photino host. -->
+    <Content Include="..\KikitanTranslator.Photino\Resources\wwwroot\silero_vad.onnx">
+      <Link>silero_vad.onnx</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <!-- FORK (feed-overlay): build the overlay and stage it next to this exe,
+       since AppEngine launches KikitanTranslator.Overlay.exe from the app dir.
+       The overlay targets net9.0-windows, so its output path is hardcoded
+       (this project's TFM is net10.0-desktop and would glob the wrong dir). -->
+  <Target Name="BuildAndStageOverlay" AfterTargets="Build">
+    <!-- Restore first: the overlay is built via a raw MSBuild task (not a
+         ProjectReference), so a plain `dotnet build` on a fresh checkout
+         would otherwise fail with NETSDK1004. TargetFramework(s) are
+         removed from the child build: this project is net10.0-desktop and
+         the overlay is net9.0-windows — inheriting ours fails with NETSDK1139. -->
+    <MSBuild Projects="..\KikitanTranslator.Overlay\KikitanTranslator.Overlay.csproj"
+             Properties="Configuration=$(Configuration);EnableWindowsTargeting=true"
+             RemoveProperties="RuntimeIdentifier;TargetFramework;TargetFrameworks"
+             Targets="Restore" />
+    <MSBuild Projects="..\KikitanTranslator.Overlay\KikitanTranslator.Overlay.csproj"
+             Properties="Configuration=$(Configuration);EnableWindowsTargeting=true"
+             RemoveProperties="RuntimeIdentifier;TargetFramework;TargetFrameworks"
+             Targets="Build" />
+    <ItemGroup>
+      <OverlayFiles Include="..\KikitanTranslator.Overlay\bin\$(Configuration)\net9.0-windows\**\*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(OverlayFiles)"
+          DestinationFiles="@(OverlayFiles->'$(OutputPath)%(RecursiveDir)%(Filename)%(Extension)')"
+          SkipUnchangedFiles="true" />
+  </Target>
+
+  <!-- FORK (feed-overlay): distribution is a portable zip built by
+       .github/workflows/uno-portable.yml. No installer. -->
+
+  <!-- FORK: copy libcurl native libs to publish output (same as upstream's
+       Photino CopyLibcurl target). Without these, the Google Translate curl
+       fallback throws DllNotFoundException. -->
+  <Target Name="CopyLibcurl" AfterTargets="Publish">
+    <ItemGroup>
+      <LibcurlFiles Include="$(MSBuildProjectDirectory)/../KikitanTranslator.Base/libcurl/**/*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(LibcurlFiles)"
+          DestinationFiles="@(LibcurlFiles->'$(PublishDir)%(RecursiveDir)%(Filename)%(Extension)')"
+          SkipUnchangedFiles="true" />
+  </Target>
+
+</Project>
