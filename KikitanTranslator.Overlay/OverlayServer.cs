@@ -27,7 +27,7 @@ public class OverlayServer
 
     private async Task StartReader()
     {
-        // FORK (feed-overlay): the WinForms host does not create the legacy
+        // FORK (feed-overlay): the Uno host does not create the legacy
         // "kikitan-pipe"; tolerate its absence instead of throwing.
         OverlayReader? reader = null;
         try { reader = new OverlayReader(); }

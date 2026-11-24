@@ -1,5 +1,5 @@
 // FORK (feed-overlay): feed channel reader. Mirrors FeedPipeWriter.cs in
-// KikitanTranslator.WinForms (keep the JSON shape in sync). JSON over MMF so
+// KikitanTranslator.Uno (keep the JSON shape in sync). JSON over MMF so
 // the schema can grow without breaking native struct layouts.
 
 using System.IO.MemoryMappedFiles;
