@@ -1,0 +1,93 @@
+# FORK (feed-overlay): builds the native Uno host as a portable zip
+# on a real Windows runner.
+
+name: Build KikiVRCTan portable (fork)
+
+on:
+  push:
+    branches: [feed-overlay]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  feed-tests:
+    name: Feed pipe + renderer tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: feed-overlay
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Run feed tests
+        env:
+          DOTNET_CLI_TELEMETRY_OPTOUT: 1
+        run: dotnet run -c Release --project tests/FeedTests/FeedTests.csproj
+
+      - name: Upload render outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: feed-render-outputs
+          path: tests/FeedTests/test-output/
+
+  build-portable:
+    name: Build portable zip
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: feed-overlay
+
+      # FORK: the Uno host needs SDK 10; the overlay (net9.0-windows) and
+      # Base (net9.0) still target .NET 9, so install that SDK too for their
+      # targeting packs. global.json pins the CLI to SDK 10.
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Setup .NET 9
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Publish app (self-contained, single-file)
+        env:
+          DOTNET_CLI_TELEMETRY_OPTOUT: 1
+        run: |
+          dotnet publish KikitanTranslator.Uno/KikitanTranslator.Uno.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:TargetFrameworks=net10.0-desktop -o KikitanTranslator.Uno/publish/app
+          dotnet publish KikitanTranslator.Overlay/KikitanTranslator.Overlay.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o KikitanTranslator.Uno/publish/app
+          $env:GITHUB_SHA | Out-File -FilePath KikitanTranslator.Uno/publish/app/version.txt -NoNewline
+
+      - name: Create portable zip
+        run: |
+          Compress-Archive -Path KikitanTranslator.Uno\publish\app\* -DestinationPath KikiVRCTan-portable.zip -Force
+          Copy-Item KikitanTranslator.Uno\publish\app\version.txt -Destination version.txt
+
+      - name: Upload portable zip
+        uses: actions/upload-artifact@v4
+        with:
+          name: KikiVRCTan-portable
+          path: KikiVRCTan-portable.zip
+          if-no-files-found: error
+
+      - name: Publish to GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $tag = "feed-overlay-latest"
+          gh release view $tag 2>$null
+          if ($LASTEXITCODE -ne 0) {
+            gh release create $tag --prerelease `
+              --title "KikiVRCTan (feed-overlay latest)" `
+              --notes "Latest automated build of the feed-overlay branch. Download KikiVRCTan-portable.zip, extract anywhere, run KikitanTranslator.exe."
+          }
+          gh release upload $tag KikiVRCTan-portable.zip version.txt --clobber
