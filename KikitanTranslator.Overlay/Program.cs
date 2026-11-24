@@ -36,9 +36,9 @@ static class Program
             while (true)
                 // FORK (feed-overlay): also stay alive under the Uno host.
                 // (Was WinForms before the Uno migration; the host exe is
-                // KikitanTranslator.exe since the c2adef7 rename.)
+                // KikiVRCTan.exe.)
                 if (Process.GetProcessesByName("KikitanTranslator.Photino").Length == 0
-                    && Process.GetProcessesByName("KikitanTranslator").Length == 0)
+                    && Process.GetProcessesByName("KikiVRCTan").Length == 0)
                 {
                     Console.WriteLine("Kikitan is not running!");
                     

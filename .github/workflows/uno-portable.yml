@@ -97,6 +97,6 @@ jobs:
           if ($LASTEXITCODE -ne 0) {
             gh release create $tag --prerelease `
               --title "KikiVRCTan (feed-overlay latest)" `
-              --notes "Latest automated build of the feed-overlay branch. Download KikiVRCTan-portable.zip, extract anywhere, run KikitanTranslator.exe."
+              --notes "Latest automated build of the feed-overlay branch. Download KikiVRCTan-portable.zip, extract anywhere, run KikiVRCTan.exe."
           }
           gh release upload $tag KikiVRCTan-portable.zip version.txt --clobber

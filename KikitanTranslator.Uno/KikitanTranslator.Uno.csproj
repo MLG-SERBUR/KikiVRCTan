@@ -3,10 +3,10 @@
     <TargetFrameworks>net10.0-desktop</TargetFrameworks>
 
     <!-- FORK (feed-overlay): Uno Platform 7 Skia Desktop host, replacing the
-         WinForms host. Exe name stays KikitanTranslator.exe for the updater
-         and release notes. -->
+         WinForms host. Exe name is KikiVRCTan.exe (renamed from
+         KikitanTranslator.exe; the updater restarts by that name). -->
     <OutputType>WinExe</OutputType>
-    <AssemblyName>KikitanTranslator</AssemblyName>
+    <AssemblyName>KikiVRCTan</AssemblyName>
     <RootNamespace>KikitanTranslator.Uno</RootNamespace>
     <Version>2.1.0</Version>
     <Nullable>enable</Nullable>
