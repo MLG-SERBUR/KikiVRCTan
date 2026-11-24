@@ -59,12 +59,21 @@ jobs:
         with:
           dotnet-version: '9.0.x'
 
+      # FORK: -f selects the Uno head's TFM for the top project only. Do NOT
+      # pass -p:TargetFrameworks=net10.0-desktop: it flows into the net9.0
+      # Base/Resources references as a global property and fails restore
+      # with NETSDK1139 (that bad flag shipped the overlay-only zip once).
+      # Each publish is checked explicitly: pwsh does not fail the step on
+      # a native command's non-zero exit, so an unchecked failure would
+      # silently ship a partial zip (the overlay publish alone succeeds).
       - name: Publish app (self-contained, single-file)
         env:
           DOTNET_CLI_TELEMETRY_OPTOUT: 1
         run: |
-          dotnet publish KikitanTranslator.Uno/KikitanTranslator.Uno.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:TargetFrameworks=net10.0-desktop -o KikitanTranslator.Uno/publish/app
+          dotnet publish KikitanTranslator.Uno/KikitanTranslator.Uno.csproj -f net10.0-desktop -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o KikitanTranslator.Uno/publish/app
+          if ($LASTEXITCODE -ne 0) { throw "Uno publish failed" }
           dotnet publish KikitanTranslator.Overlay/KikitanTranslator.Overlay.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o KikitanTranslator.Uno/publish/app
+          if ($LASTEXITCODE -ne 0) { throw "Overlay publish failed" }
           $env:GITHUB_SHA | Out-File -FilePath KikitanTranslator.Uno/publish/app/version.txt -NoNewline
 
       - name: Create portable zip
