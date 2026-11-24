@@ -6,12 +6,15 @@ and a native Windows UI, without touching the speech/translation backend.
 
 ## What changed
 
-**New: `KikitanTranslator.WinForms`** — native WinForms host, no webview/WebView2
+**New: `KikitanTranslator.Uno`** — native Uno Platform 7 host (Skia Desktop
+head, `net10.0-desktop`, .NET 10), no webview/WebView2
 (upstream's `KikitanTranslator.Photino` project is untouched and still builds).
+It replaced the WinForms host outright in the Uno migration (2026-11-24);
+the `KikitanTranslator.WinForms` project is deleted.
 
-- `Program.cs` — entry point: Serilog `Logger.Initialize()`, `AppConfig.Load()`,
-  runs `MainForm`. Single-instance guard (named mutex): a second copy
-  refuses to start instead of double-sending OSC.
+- `Platforms/Desktop/Program.cs` — entry point: Serilog `Logger.Initialize()`,
+  `AppConfig.Load()`, runs the Uno host with `MainPage`. Single-instance guard
+  (named mutex): a second copy refuses to start instead of double-sending OSC.
 - `AppEngine.cs` — pipeline orchestration, mirrors upstream `Photino/Manager`
   (same recognizers/translators/capture, chatbox + OSC outputs, mic fallback
   watcher, overlay process launch). Adds the translation feed as a plain
@@ -23,10 +26,13 @@ and a native Windows UI, without touching the speech/translation backend.
 - `FeedPipeWriter.cs` — JSON over a named MMF (`kikitan-pipe` is upstream's
   legacy single-message pipe; `kikitan-feed` is new and carries entries +
   overlay config).
-- `MainForm.cs` — settings UI (languages, recognizer/translator, mic,
-  VRChat/chatbox options, API keys, overlay settings) bound to the shared
-  `AppConfig` (`%APPDATA%/Kikitan Translator/config.json`, same file as
-  upstream), plus a live feed list. Two tabs: Main (Start/Stop, Send text
+- `MainPage.xaml` + `MainPage.xaml.cs` — settings UI (languages,
+  recognizer/translator, mic, VRChat/chatbox options, API keys, overlay
+  settings) bound to the shared `AppConfig` (`%APPDATA%/Kikitan Translator/config.json`, same file as
+  upstream), plus a live feed list: a virtualized `ItemsRepeater` with one
+  entry per message (timestamp + speaker + transcription/translation lines,
+  incoming blue, own mic green), auto-scrolling while pinned to the end.
+  Two tabs: Main (Start/Stop, Send text
   + the Send to chatbox toggle, target-language quick buttons) and Settings
   (everything else). The quick
   buttons switch the target language in one tap — Korean, Japanese,
@@ -39,10 +45,10 @@ and a native Windows UI, without touching the speech/translation backend.
   display language and is switched from a button on Main showing the current
   language's flag + native name, with a menu listing all seven the same
   way. The flags are real pictures, not emoji — Windows has no flag glyphs
-  (Segoe UI Emoji renders them as the two-letter code) — bundled as
-  embedded PNGs in `Resources/flags/` (`FlagImages.cs` scales them per UI
-  size), flat 4:3 renders of lipis/flag-icons via flagcdn.com, MIT (license
-  in `Resources/flags/LICENSE.txt`); Arabic uses the Saudi flag as the
+  (Segoe UI Emoji renders them as the two-letter code) — bundled as loose
+  PNGs in `Assets/flags/` (loaded via `ms-appx` URIs, cached by
+  `FlagImages.cs`), flat 4:3 renders of lipis/flag-icons via flagcdn.com, MIT (license
+  in `Assets/flags/LICENSE.txt`); Arabic uses the Saudi flag as the
   conventional stand-in. Saved as `ui_language`, empty means follow Windows. The From dropdown is on Main too, synced with
   the one in Settings, and on a true first run it defaults to the UI
   language (Spanish maps to es-ES, the Source list has no plain "es").
@@ -70,7 +76,7 @@ and a native Windows UI, without touching the speech/translation backend.
   `overlay_anchor`, `overlay_width_cm`,
   `overlay_show_original`, `overlay_display_duration_sec`,
   `overlay_fadeout_duration_sec`, `overlay_pos_x/y/z`,
-  `desktop_overlay_enabled`) plus WinForms-only UI settings
+  `desktop_overlay_enabled`) plus Uno-only UI settings
   (`ui_scale`: window/control scale percent, applied live with no restart;
   `log_font_size`). Unknown to upstream builds, which ignore extra
   JSON members.
@@ -95,10 +101,11 @@ and a native Windows UI, without touching the speech/translation backend.
   single-message path preserved.
 - `Form1.cs` — `SetFeedImage` (persistent, optional display duration) /
   `ClearImage`; feed drawn larger than legacy messages.
-- `Program.cs` — watchdog also accepts the WinForms host process; VR overlay
+- `Program.cs` — watchdog also accepts the Uno host process
+  (`KikitanTranslator.exe`); VR overlay
   loop moved to a background thread so the desktop form runs alongside it.
 
-`sln` — WinForms project added. The WinForms build also builds + stages
+`sln` — Uno project added (WinForms project deleted). The Uno build also builds + stages
 `KikitanTranslator.Overlay.exe` next to its own exe.
 
 ## Upstream sync strategy
@@ -110,13 +117,13 @@ and a native Windows UI, without touching the speech/translation backend.
   (overlay), each change fenced by `// FORK` comments.
 - To pull upstream: `git fetch upstream && git merge upstream/main`
   (resolve; the `// FORK` blocks are small and localized). The Photino web UI
-  is untouched, so its churn never conflicts with the WinForms host.
+  is untouched, so its churn never conflicts with the Uno host.
 
 ## Distribution
 
 No installer — KikiVRCTan is portable. The workflow publishes a
 self-contained, single-file win-x64 build (`PublishSingleFile`; the zip holds
-just the two exes, `silero_vad.onnx`, and `version.txt`) as
+the two exes, `silero_vad.onnx`, the `Assets/flags/` pictures, and `version.txt`) as
 `KikiVRCTan-portable.zip`, attached to the `feed-overlay-latest` prerelease
 (and as a workflow artifact).
 
@@ -135,4 +142,4 @@ startup; on mismatch it downloads the zip in the background and shows a
 
 `tests/FeedTests` — Linux-runnable: feed pipe round-trip (skipped on Linux,
 named MMFs are Windows-only) and `FeedRenderer` scenarios saved as PNGs for
-visual inspection. The WinForms UI and OpenVR overlay need real Windows.
+visual inspection. The Uno UI and OpenVR overlay need real Windows.
