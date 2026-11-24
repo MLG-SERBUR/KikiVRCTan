@@ -32,9 +32,10 @@ the `KikitanTranslator.WinForms` project is deleted.
   upstream), plus a live feed list: a virtualized `ItemsRepeater` with one
   entry per message (timestamp + speaker + transcription/translation lines,
   incoming blue, own mic green), auto-scrolling while pinned to the end.
-  A ‹/› button on the divider collapses the settings column so the feed
-  takes the whole window (and back); the 20px strip stays grabbable by
-  touch, and dragging it re-opens the settings.
+  A ›/‹ button on the divider hides the feed (the log) so the settings
+  take the whole window (and back). The button is also the drag handle:
+  press and drag it to resize the settings column, tap it to hide/show
+  the log; the 20px strip stays grabbable by touch either way.
   Six tabs: Main (Start/Stop, Send text
   + the Send to chatbox toggle, target-language quick buttons), Voice
   (speech: From/To/recognizer/translator/mic), VRChat, Overlay, API keys,

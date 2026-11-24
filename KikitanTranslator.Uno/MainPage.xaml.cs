@@ -53,7 +53,13 @@ public sealed partial class MainPage : Page
     private string _lastStatus = "Stopped";
     private double _uiFactor = 1;
     private double _settingsWidth = 320;
-    private bool _settingsCollapsed = false;
+    private bool _feedCollapsed = false;
+    // FORK: the divider button is both a drag handle and a tap target.
+    private bool _collapsePressed = false;
+    private bool _collapseDragging = false;
+    private bool _collapseStartedCollapsed = false;
+    private double _collapseStartX;
+    private double _collapseStartWidth;
     private bool _loading = true;
     private bool _stickToBottom = true;
     private MenuFlyout? _langMenu;
@@ -131,25 +137,65 @@ public sealed partial class MainPage : Page
 
     private void SplitterThumb_DragDelta(object sender, DragDeltaEventArgs e)
     {
-        // Dragging the strip re-opens a collapsed settings column.
-        if (_settingsCollapsed) SetSettingsCollapsed(false);
+        // Dragging the strip re-opens a hidden feed.
+        if (_feedCollapsed) SetFeedCollapsed(false);
         _settingsWidth = Math.Clamp(_settingsWidth + e.HorizontalChange, 200, 600);
         SettingsColumn.Width = new GridLength(_settingsWidth);
     }
 
-    // FORK: hide/show button on the divider (VRCT-style) — collapses the
-    // settings column so the feed takes the whole window, and back. The
-    // strip stays 20px wide at the left edge, so the button stays reachable
-    // by touch to bring the settings back.
-    private void CollapseButton_Click(object sender, RoutedEventArgs e) =>
-        SetSettingsCollapsed(!_settingsCollapsed);
-
-    private void SetSettingsCollapsed(bool collapsed)
+    // FORK: the divider button hides the FEED (the log), not the settings —
+    // tap it and the settings take the whole window, tap again and the log
+    // comes back. It is also the drag handle: pressing and moving it
+    // resizes the settings column exactly like the strip does, so the
+    // button never blocks dragging. A tap is a press+release with almost
+    // no movement; a drag re-opens a hidden feed first, then resizes.
+    private void CollapseButton_PointerPressed(object sender, PointerRoutedEventArgs e)
     {
-        _settingsCollapsed = collapsed;
-        Tabs.Visibility = collapsed ? Visibility.Collapsed : Visibility.Visible;
-        SettingsColumn.Width = new GridLength(collapsed ? 0 : _settingsWidth);
-        CollapseGlyph.Text = collapsed ? "›" : "‹";
+        CollapseButton.CapturePointer(e.Pointer);
+        _collapsePressed = true;
+        _collapseDragging = false;
+        _collapseStartedCollapsed = _feedCollapsed;
+        _collapseStartX = e.GetCurrentPoint(RootGrid).Position.X;
+        _collapseStartWidth = _settingsWidth;
+    }
+
+    private void CollapseButton_PointerMoved(object sender, PointerRoutedEventArgs e)
+    {
+        if (!_collapsePressed) return;
+        var dx = e.GetCurrentPoint(RootGrid).Position.X - _collapseStartX;
+        if (!_collapseDragging && Math.Abs(dx) < 4) return;
+        if (!_collapseDragging)
+        {
+            _collapseDragging = true;
+            if (_collapseStartedCollapsed) SetFeedCollapsed(false);
+        }
+        _settingsWidth = Math.Clamp(_collapseStartWidth + dx, 200, 600);
+        SettingsColumn.Width = new GridLength(_settingsWidth);
+    }
+
+    private void CollapseButton_PointerReleased(object sender, PointerRoutedEventArgs e)
+    {
+        CollapseButton.ReleasePointerCapture(e.Pointer);
+        if (_collapsePressed && !_collapseDragging)
+            SetFeedCollapsed(!_collapseStartedCollapsed);
+        _collapsePressed = false;
+        _collapseDragging = false;
+    }
+
+    private void CollapseButton_PointerCanceled(object sender, PointerRoutedEventArgs e)
+    {
+        CollapseButton.ReleasePointerCapture(e.Pointer);
+        _collapsePressed = false;
+        _collapseDragging = false;
+    }
+
+    private void SetFeedCollapsed(bool collapsed)
+    {
+        _feedCollapsed = collapsed;
+        FeedScroll.Visibility = collapsed ? Visibility.Collapsed : Visibility.Visible;
+        FeedColumn.Width = collapsed ? new GridLength(0) : new GridLength(1, GridUnitType.Star);
+        SettingsColumn.Width = collapsed ? new GridLength(1, GridUnitType.Star) : new GridLength(_settingsWidth);
+        CollapseGlyph.Text = collapsed ? "‹" : "›";
     }
 
     // FORK: UI-language switcher — a button showing the current language

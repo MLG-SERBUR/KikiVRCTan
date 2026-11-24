@@ -46,7 +46,7 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition x:Name="SettingsColumn" Width="320" />
             <ColumnDefinition Width="20" />
-            <ColumnDefinition Width="*" />
+            <ColumnDefinition x:Name="FeedColumn" Width="*" />
         </Grid.ColumnDefinitions>
 
         <TabView x:Name="Tabs" Grid.Column="0" IsAddTabButtonVisible="False">
@@ -400,14 +400,18 @@
         </TabView>
 
         <!-- Splitter between the settings tabs and the feed. WinUI has no
-             GridSplitter, so a Thumb drives the settings column width. -->
+             GridSplitter, so a Thumb drives the settings column width — and
+             the button on it is a second drag handle (tap it to hide/show
+             the feed, drag it to resize). -->
         <Grid Grid.Column="1">
             <Thumb x:Name="SplitterThumb" DragDelta="SplitterThumb_DragDelta" Background="Transparent"
                    HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
             <Border Width="1" HorizontalAlignment="Center" Background="{ThemeResource CardStrokeColorDefaultBrush}" />
             <Button x:Name="CollapseButton" Width="20" Height="56" HorizontalAlignment="Center" VerticalAlignment="Center"
-                    Background="Transparent" BorderThickness="0" Padding="0" Click="CollapseButton_Click">
-                <TextBlock x:Name="CollapseGlyph" Text="‹" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    Background="Transparent" BorderThickness="0" Padding="0"
+                    PointerPressed="CollapseButton_PointerPressed" PointerMoved="CollapseButton_PointerMoved"
+                    PointerReleased="CollapseButton_PointerReleased" PointerCanceled="CollapseButton_PointerCanceled">
+                <TextBlock x:Name="CollapseGlyph" Text="›" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center" />
             </Button>
         </Grid>
 
