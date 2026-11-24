@@ -8,6 +8,10 @@
     mc:Ignorable="d">
 
     <Page.Resources>
+        <DataTemplate x:Key="ButtonTextTemplate">
+            <TextBlock Text="{Binding}" TextWrapping="Wrap" TextAlignment="Center"
+                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+        </DataTemplate>
         <Style x:Key="GroupBorderStyle" TargetType="Border">
             <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
             <Setter Property="BorderThickness" Value="1" />
@@ -52,19 +56,34 @@
                         <Border Style="{StaticResource GroupBorderStyle}">
                             <StackPanel>
                                 <TextBlock x:Name="ControlGroupHeader" Style="{StaticResource GroupHeaderStyle}" Text="Control" />
-                                <VariableSizedWrapGrid Orientation="Horizontal">
-                                    <Button x:Name="StartStopButton" Content="Start" Height="28" MinWidth="90" Padding="12,0" Margin="0,0,6,6" Click="StartStopButton_Click" />
-                                    <Button x:Name="ClearFeedButton" Content="Clear feed" Height="28" MinWidth="90" Padding="12,0" Margin="0,0,6,6" Click="ClearFeedButton_Click" />
-                                    <Button x:Name="LangButton" Height="28" Margin="0,0,6,6" Click="LangButton_Click">
-                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                <Grid ColumnSpacing="6" RowSpacing="6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <Button x:Name="StartStopButton" Content="Start" ContentTemplate="{StaticResource ButtonTextTemplate}"
+                                            MinHeight="36" Padding="8,4" Click="StartStopButton_Click" />
+                                    <Button x:Name="ClearFeedButton" Grid.Column="1" Content="Clear feed" ContentTemplate="{StaticResource ButtonTextTemplate}"
+                                            MinHeight="36" Padding="8,4" Click="ClearFeedButton_Click" />
+                                    <Button x:Name="LangButton" Grid.Row="1" Grid.ColumnSpan="2" MinHeight="36" Padding="8,4" Click="LangButton_Click">
+                                        <Grid ColumnSpacing="6">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
                                             <Image x:Name="LangFlag" Width="24" Height="18" Stretch="Uniform" />
-                                            <TextBlock x:Name="LangName" VerticalAlignment="Center" Text="English" />
-                                        </StackPanel>
+                                            <TextBlock x:Name="LangName" Grid.Column="1" VerticalAlignment="Center" Text="English" TextWrapping="Wrap" />
+                                        </Grid>
                                     </Button>
-                                </VariableSizedWrapGrid>
+                                </Grid>
                                 <TextBlock x:Name="StatusText" Text="Stopped" Margin="0,6,0,0" />
                                 <TextBlock x:Name="MutedText" Foreground="{ThemeResource SystemFillColorCriticalBrush}" Margin="0,2,0,0" />
-                                <Button x:Name="UpdateButton" Content="Restart to update" Height="28" MinWidth="130" Padding="12,0" Margin="0,6,0,0"
+                                <Button x:Name="UpdateButton" Content="Restart to update" ContentTemplate="{StaticResource ButtonTextTemplate}"
+                                        HorizontalAlignment="Stretch" MinHeight="36" Padding="8,4" Margin="0,6,0,0"
                                         Visibility="Collapsed" Click="UpdateButton_Click" />
                             </StackPanel>
                         </Border>
@@ -78,7 +97,8 @@
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
                                     <TextBox x:Name="ManualBox" KeyDown="ManualBox_KeyDown" TextChanged="ManualBox_TextChanged" />
-                                    <Button x:Name="SendButton" Grid.Column="1" Content="Send" Height="28" MinWidth="90" Padding="12,0" Margin="6,0,0,0" Click="SendButton_Click" />
+                                    <Button x:Name="SendButton" Grid.Column="1" Content="Send" ContentTemplate="{StaticResource ButtonTextTemplate}"
+                                            Width="76" MinHeight="36" Padding="6,4" Margin="6,0,0,0" Click="SendButton_Click" />
                                 </Grid>
                                 <CheckBox x:Name="SendToChatboxBox" Content="Send to chatbox" Margin="0,6,0,0" />
                             </StackPanel>
@@ -164,7 +184,8 @@
                                         </Grid.ColumnDefinitions>
                                         <ComboBox x:Name="MicCombo" HorizontalAlignment="Stretch"
                                                   PointerWheelChanged="ComboBox_PointerWheelChanged" />
-                                        <Button x:Name="MicRefreshButton" Grid.Column="1" Content="Refresh" Height="24" MinWidth="58" Padding="8,0"
+                                        <Button x:Name="MicRefreshButton" Grid.Column="1" Content="Refresh" ContentTemplate="{StaticResource ButtonTextTemplate}"
+                                                Width="80" MinHeight="36" Padding="6,4"
                                                 Margin="4,0,0,0" Click="MicRefreshButton_Click" />
                                     </Grid>
                                 </Grid>
