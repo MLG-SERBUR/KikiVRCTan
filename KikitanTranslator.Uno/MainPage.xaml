@@ -52,18 +52,18 @@
                         <Border Style="{StaticResource GroupBorderStyle}">
                             <StackPanel>
                                 <TextBlock x:Name="ControlGroupHeader" Style="{StaticResource GroupHeaderStyle}" Text="Control" />
-                                <StackPanel Orientation="Horizontal" Spacing="6">
-                                    <Button x:Name="StartStopButton" Content="Start" Width="90" Height="28" Click="StartStopButton_Click" />
-                                    <Button x:Name="ClearFeedButton" Content="Clear feed" Width="90" Height="28" Click="ClearFeedButton_Click" />
-                                    <Button x:Name="LangButton" Height="28" Click="LangButton_Click">
+                                <VariableSizedWrapGrid Orientation="Horizontal">
+                                    <Button x:Name="StartStopButton" Content="Start" Width="90" Height="28" Margin="0,0,6,6" Click="StartStopButton_Click" />
+                                    <Button x:Name="ClearFeedButton" Content="Clear feed" Width="90" Height="28" Margin="0,0,6,6" Click="ClearFeedButton_Click" />
+                                    <Button x:Name="LangButton" Height="28" Margin="0,0,6,6" Click="LangButton_Click">
                                         <StackPanel Orientation="Horizontal" Spacing="6">
                                             <Image x:Name="LangFlag" Width="24" Height="18" Stretch="Uniform" />
                                             <TextBlock x:Name="LangName" VerticalAlignment="Center" Text="English" />
                                         </StackPanel>
                                     </Button>
-                                </StackPanel>
+                                </VariableSizedWrapGrid>
                                 <TextBlock x:Name="StatusText" Text="Stopped" Margin="0,6,0,0" />
-                                <TextBlock x:Name="MutedText" Foreground="#FF8A80" Margin="0,2,0,0" />
+                                <TextBlock x:Name="MutedText" Foreground="{ThemeResource SystemFillColorCriticalBrush}" Margin="0,2,0,0" />
                                 <Button x:Name="UpdateButton" Content="Restart to update" Width="130" Height="28" Margin="0,6,0,0"
                                         Visibility="Collapsed" Click="UpdateButton_Click" />
                             </StackPanel>
@@ -96,13 +96,13 @@
                                     <ComboBox x:Name="FromComboMain" Grid.Column="1" HorizontalAlignment="Stretch"
                                               DisplayMemberPath="Name" PointerWheelChanged="ComboBox_PointerWheelChanged" />
                                 </Grid>
-                                <StackPanel Orientation="Horizontal" Spacing="4">
-                                    <Button x:Name="QuickKo" Content="Korean" MinHeight="36" Tag="ko" Click="QuickButton_Click" />
-                                    <Button x:Name="QuickJa" Content="Japanese" MinHeight="36" Tag="ja" Click="QuickButton_Click" />
-                                    <Button x:Name="QuickZh" Content="Chinese" MinHeight="36" Tag="zh" Click="QuickButton_Click" />
-                                    <Button x:Name="QuickAr" Content="Arabic" MinHeight="36" Tag="ar" Click="QuickButton_Click" />
-                                    <Button x:Name="QuickEs" Content="Spanish" MinHeight="36" Tag="es" Click="QuickButton_Click" />
-                                </StackPanel>
+                                <VariableSizedWrapGrid Orientation="Horizontal">
+                                    <Button x:Name="QuickKo" Content="Korean" MinHeight="36" Margin="0,0,4,4" Tag="ko" Click="QuickButton_Click" />
+                                    <Button x:Name="QuickJa" Content="Japanese" MinHeight="36" Margin="0,0,4,4" Tag="ja" Click="QuickButton_Click" />
+                                    <Button x:Name="QuickZh" Content="Chinese" MinHeight="36" Margin="0,0,4,4" Tag="zh" Click="QuickButton_Click" />
+                                    <Button x:Name="QuickAr" Content="Arabic" MinHeight="36" Margin="0,0,4,4" Tag="ar" Click="QuickButton_Click" />
+                                    <Button x:Name="QuickEs" Content="Spanish" MinHeight="36" Margin="0,0,4,4" Tag="es" Click="QuickButton_Click" />
+                                </VariableSizedWrapGrid>
                             </StackPanel>
                         </Border>
                     </StackPanel>
@@ -188,7 +188,7 @@
                                         </Grid.ColumnDefinitions>
                                         <ComboBox x:Name="MicCombo" HorizontalAlignment="Stretch"
                                                   PointerWheelChanged="ComboBox_PointerWheelChanged" />
-                                        <Button x:Name="MicRefreshButton" Grid.Column="1" Content="Refresh" Width="58" Height="24"
+                                        <Button x:Name="MicRefreshButton" Grid.Column="1" Content="Refresh" Height="24" MinWidth="58" Padding="8,0"
                                                 Margin="4,0,0,0" Click="MicRefreshButton_Click" />
                                     </Grid>
                                 </Grid>
@@ -347,7 +347,7 @@
                    HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
         </Grid>
 
-        <ScrollViewer x:Name="FeedScroll" Grid.Column="2" Background="#141414">
+        <ScrollViewer x:Name="FeedScroll" Grid.Column="2" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
             <ItemsRepeater x:Name="FeedList" ItemTemplate="{StaticResource FeedItemTemplate}">
                 <ItemsRepeater.Layout>
                     <StackLayout Orientation="Vertical" />

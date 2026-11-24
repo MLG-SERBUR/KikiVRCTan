@@ -307,7 +307,6 @@ public sealed partial class MainPage : Page
             if (_cfg.UiScale == v) return;
             _cfg.UiScale = v;
             ApplyUiScale();
-            StatusText.Text = string.Format(T("UI size {0}% applied"), _cfg.UiScale);
         });
         WireNum(MaxEntriesBox, v => _cfg.OverlayMaxEntries = v);
         WireNum(OverlayFontSizeBox, v => _cfg.OverlayFontSize = v);
