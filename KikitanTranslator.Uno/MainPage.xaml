@@ -116,13 +116,27 @@
                                     <ComboBox x:Name="FromComboMain" Grid.Column="1" HorizontalAlignment="Stretch"
                                               DisplayMemberPath="Name" PointerWheelChanged="ComboBox_PointerWheelChanged" />
                                 </Grid>
-                                <VariableSizedWrapGrid Orientation="Horizontal">
-                                    <Button x:Name="QuickKo" Content="Korean" MinHeight="36" Margin="0,0,4,4" Tag="ko" Click="QuickButton_Click" />
-                                    <Button x:Name="QuickJa" Content="Japanese" MinHeight="36" Margin="0,0,4,4" Tag="ja" Click="QuickButton_Click" />
-                                    <Button x:Name="QuickZh" Content="Chinese" MinHeight="36" Margin="0,0,4,4" Tag="zh" Click="QuickButton_Click" />
-                                    <Button x:Name="QuickAr" Content="Arabic" MinHeight="36" Margin="0,0,4,4" Tag="ar" Click="QuickButton_Click" />
-                                    <Button x:Name="QuickEs" Content="Spanish" MinHeight="36" Margin="0,0,4,4" Tag="es" Click="QuickButton_Click" />
-                                </VariableSizedWrapGrid>
+                                <Grid ColumnSpacing="4" RowSpacing="4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <Button x:Name="QuickKo" Content="Korean" ContentTemplate="{StaticResource ButtonTextTemplate}"
+                                            MinHeight="36" Padding="4" Tag="ko" Click="QuickButton_Click" />
+                                    <Button x:Name="QuickJa" Grid.Column="1" Content="Japanese" ContentTemplate="{StaticResource ButtonTextTemplate}"
+                                            MinHeight="36" Padding="4" Tag="ja" Click="QuickButton_Click" />
+                                    <Button x:Name="QuickZh" Grid.Column="2" Content="Chinese" ContentTemplate="{StaticResource ButtonTextTemplate}"
+                                            MinHeight="36" Padding="4" Tag="zh" Click="QuickButton_Click" />
+                                    <Button x:Name="QuickAr" Grid.Row="1" Content="Arabic" ContentTemplate="{StaticResource ButtonTextTemplate}"
+                                            MinHeight="36" Padding="4" Tag="ar" Click="QuickButton_Click" />
+                                    <Button x:Name="QuickEs" Grid.Row="1" Grid.Column="1" Content="Spanish" ContentTemplate="{StaticResource ButtonTextTemplate}"
+                                            MinHeight="36" Padding="4" Tag="es" Click="QuickButton_Click" />
+                                </Grid>
                             </StackPanel>
                         </Border>
                     </StackPanel>
