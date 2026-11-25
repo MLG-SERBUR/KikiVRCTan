@@ -13,10 +13,87 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
+using Windows.Foundation;
 using Windows.System;
 using Windows.UI.Core;
 
 namespace KikitanTranslator.Uno;
+
+public sealed class LeftWrapPanel : Panel
+{
+    public static readonly DependencyProperty ItemSpacingProperty = DependencyProperty.Register(
+        nameof(ItemSpacing), typeof(double), typeof(LeftWrapPanel), new PropertyMetadata(0d));
+    public static readonly DependencyProperty LineSpacingProperty = DependencyProperty.Register(
+        nameof(LineSpacing), typeof(double), typeof(LeftWrapPanel), new PropertyMetadata(0d));
+
+    public double ItemSpacing
+    {
+        get => (double)GetValue(ItemSpacingProperty);
+        set => SetValue(ItemSpacingProperty, value);
+    }
+
+    public double LineSpacing
+    {
+        get => (double)GetValue(LineSpacingProperty);
+        set => SetValue(LineSpacingProperty, value);
+    }
+
+    protected override Size MeasureOverride(Size availableSize)
+    {
+        var lineWidth = 0d;
+        var lineHeight = 0d;
+        var desiredWidth = 0d;
+        var desiredHeight = 0d;
+
+        foreach (var child in Children)
+        {
+            child.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+            var childSize = child.DesiredSize;
+            var nextWidth = lineWidth == 0 ? childSize.Width : lineWidth + ItemSpacing + childSize.Width;
+            if (lineWidth > 0 && nextWidth > availableSize.Width)
+            {
+                desiredWidth = Math.Max(desiredWidth, lineWidth);
+                desiredHeight += lineHeight + LineSpacing;
+                lineWidth = 0;
+                lineHeight = 0;
+                nextWidth = childSize.Width;
+            }
+
+            lineWidth = nextWidth;
+            lineHeight = Math.Max(lineHeight, childSize.Height);
+        }
+
+        desiredWidth = Math.Max(desiredWidth, lineWidth);
+        desiredHeight += lineHeight;
+        return new Size(Math.Min(desiredWidth, availableSize.Width), desiredHeight);
+    }
+
+    protected override Size ArrangeOverride(Size finalSize)
+    {
+        var x = 0d;
+        var y = 0d;
+        var lineHeight = 0d;
+
+        foreach (var child in Children)
+        {
+            var childSize = child.DesiredSize;
+            var nextX = x == 0 ? childSize.Width : x + ItemSpacing + childSize.Width;
+            if (x > 0 && nextX > finalSize.Width)
+            {
+                y += lineHeight + LineSpacing;
+                x = 0;
+                lineHeight = 0;
+                nextX = childSize.Width;
+            }
+
+            child.Arrange(new Rect(x, y, childSize.Width, childSize.Height));
+            x = nextX;
+            lineHeight = Math.Max(lineHeight, childSize.Height);
+        }
+
+        return finalSize;
+    }
+}
 
 // FORK: one feed entry as the virtualized list sees it. Transcription and
 // translation are separate lines (like VRCT); the header carries the
