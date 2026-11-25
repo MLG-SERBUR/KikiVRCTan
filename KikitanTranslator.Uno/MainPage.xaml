@@ -29,7 +29,10 @@
          this root ScaleTransform (80–250%). RootGrid is sized in code to the
          window size divided by the scale, so the scaled content exactly fills
          the window. Settings column width is adjustable via the splitter. -->
-    <Grid x:Name="RootGrid">
+    <!-- Keep an unscaled viewport as the page root. The inner grid is sized
+         against this stable window-sized parent before its UI scale is drawn. -->
+    <Grid x:Name="ViewportGrid">
+      <Grid x:Name="RootGrid" HorizontalAlignment="Left" VerticalAlignment="Top">
         <Grid.RenderTransformOrigin>0,0</Grid.RenderTransformOrigin>
         <Grid.RenderTransform>
             <ScaleTransform x:Name="AppScale" />
@@ -399,19 +402,6 @@
             </ItemsRepeater>
         </ScrollViewer>
 
-        <!-- When the feed is collapsed, keep its restore/resize handle at the
-             actual right edge of the window, independent of column sizing. -->
-        <Border x:Name="CollapsedEdgeHandle" Grid.ColumnSpan="3" Width="20"
-                HorizontalAlignment="Right" VerticalAlignment="Stretch" Background="Transparent"
-                Visibility="Collapsed"
-                PointerPressed="CollapseButton_PointerPressed" PointerMoved="CollapseButton_PointerMoved"
-                PointerReleased="CollapseButton_PointerReleased" PointerCanceled="CollapseButton_PointerCanceled">
-            <Grid>
-                <Border Width="1" HorizontalAlignment="Right" Background="{ThemeResource CardStrokeColorDefaultBrush}" />
-                <TextBlock x:Name="CollapsedEdgeGlyph" Text="‹" FontSize="16"
-                           HorizontalAlignment="Center" VerticalAlignment="Center" />
-            </Grid>
-        </Border>
-
+      </Grid>
     </Grid>
 </Page>

@@ -79,7 +79,7 @@ public sealed partial class MainPage : Page
         FeedScroll.SizeChanged += (_, _) => UpdateFeedViewportWidth();
         FeedScroll.ViewChanged += (_, _) =>
             _stickToBottom = FeedScroll.VerticalOffset >= FeedScroll.ScrollableHeight - 4;
-        this.SizeChanged += (_, _) =>
+        ViewportGrid.SizeChanged += (_, _) =>
         {
             UpdateRootSize();
             UpdateFeedViewportWidth();
@@ -136,9 +136,9 @@ public sealed partial class MainPage : Page
     // the scaled content exactly fills the window.
     private void UpdateRootSize()
     {
-        if (ActualWidth <= 0 || ActualHeight <= 0) return;
-        RootGrid.Width = ActualWidth / _uiFactor;
-        RootGrid.Height = ActualHeight / _uiFactor;
+        if (ViewportGrid.ActualWidth <= 0 || ViewportGrid.ActualHeight <= 0) return;
+        RootGrid.Width = ViewportGrid.ActualWidth / _uiFactor;
+        RootGrid.Height = ViewportGrid.ActualHeight / _uiFactor;
     }
 
     private void UpdateFeedViewportWidth()
@@ -231,10 +231,9 @@ public sealed partial class MainPage : Page
         SettingsColumn.Width = collapsed
             ? new GridLength(1, GridUnitType.Star)
             : new GridLength(_settingsWidth);
-        SplitterGrid.Visibility = collapsed ? Visibility.Collapsed : Visibility.Visible;
-        CollapsedEdgeHandle.Visibility = collapsed ? Visibility.Visible : Visibility.Collapsed;
+        CollapseButton.HorizontalAlignment = collapsed ? HorizontalAlignment.Right : HorizontalAlignment.Center;
+        SplitterLine.HorizontalAlignment = collapsed ? HorizontalAlignment.Right : HorizontalAlignment.Center;
         CollapseGlyph.Text = collapsed ? "‹" : "›";
-        CollapsedEdgeGlyph.Text = collapsed ? "‹" : "›";
     }
 
     // FORK: Main/Settings view switch in the same window — two ToggleButtons
