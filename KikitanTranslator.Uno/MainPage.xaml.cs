@@ -53,6 +53,7 @@ public sealed partial class MainPage : Page
     private string _lastStatus = "Stopped";
     private double _uiFactor = 1;
     private double _settingsWidth = 320;
+    private double _lastExpandedSettingsWidth = 320;
     private bool _feedCollapsed = false;
     // FORK: the divider button is both a drag handle and a tap target.
     private bool _collapsePressed = false;
@@ -140,6 +141,12 @@ public sealed partial class MainPage : Page
         if (ViewportGrid.ActualWidth <= 0 || ViewportGrid.ActualHeight <= 0) return;
         RootGrid.Width = ViewportGrid.ActualWidth / _uiFactor;
         RootGrid.Height = ViewportGrid.ActualHeight / _uiFactor;
+        if (!_feedCollapsed)
+        {
+            _settingsWidth = Math.Clamp(_settingsWidth, GetMinSettingsWidth(), GetMaxSettingsWidth());
+            SettingsColumn.Width = new GridLength(_settingsWidth);
+        }
+        UpdateSplitterAlignment();
     }
 
     private void UpdateFeedViewportWidth()
@@ -167,9 +174,11 @@ public sealed partial class MainPage : Page
             SetFeedCollapsed(false);
             return;
         }
-        _settingsWidth = Math.Clamp(_settingsWidth + e.HorizontalChange, 200, 600);
+        _settingsWidth = Math.Clamp(_settingsWidth + e.HorizontalChange, GetMinSettingsWidth(), GetMaxSettingsWidth());
+        RememberExpandedWidth();
         SettingsColumn.Width = new GridLength(_settingsWidth);
         UpdateSettingsContentWidth();
+        UpdateSplitterAlignment();
     }
 
     // FORK: the divider button hides the FEED (the log), not the settings —
@@ -202,9 +211,11 @@ public sealed partial class MainPage : Page
         // the same gesture shifts the scaled content and can clip its left
         // edge, so leave the saved pane width alone.
         if (_collapseStartedCollapsed) return;
-        _settingsWidth = Math.Clamp(_collapseStartWidth + dx, 200, 600);
+        _settingsWidth = Math.Clamp(_collapseStartWidth + dx, GetMinSettingsWidth(), GetMaxSettingsWidth());
+        RememberExpandedWidth();
         SettingsColumn.Width = new GridLength(_settingsWidth);
         UpdateSettingsContentWidth();
+        UpdateSplitterAlignment();
     }
 
     private void CollapseButton_PointerReleased(object sender, PointerRoutedEventArgs e)
@@ -225,6 +236,11 @@ public sealed partial class MainPage : Page
 
     private void SetFeedCollapsed(bool collapsed)
     {
+        if (collapsed)
+            RememberExpandedWidth();
+        else
+            _settingsWidth = Math.Min(_lastExpandedSettingsWidth, GetMaxSettingsWidth());
+
         _feedCollapsed = collapsed;
         FeedScroll.Visibility = collapsed ? Visibility.Collapsed : Visibility.Visible;
         FeedColumn.Width = collapsed ? new GridLength(0) : new GridLength(1, GridUnitType.Star);
@@ -234,9 +250,26 @@ public sealed partial class MainPage : Page
         SettingsColumn.Width = collapsed
             ? new GridLength(1, GridUnitType.Star)
             : new GridLength(_settingsWidth);
-        CollapseButton.HorizontalAlignment = collapsed ? HorizontalAlignment.Right : HorizontalAlignment.Center;
-        SplitterLine.HorizontalAlignment = collapsed ? HorizontalAlignment.Right : HorizontalAlignment.Center;
         CollapseGlyph.Text = collapsed ? "‹" : "›";
+        UpdateSplitterAlignment();
+    }
+
+    private double GetMaxSettingsWidth() => Math.Max(0, RootGrid.Width - SplitterColumn.Width.Value);
+
+    private double GetMinSettingsWidth() => Math.Min(200, GetMaxSettingsWidth());
+
+    private void RememberExpandedWidth()
+    {
+        if (_settingsWidth < GetMaxSettingsWidth() - 1)
+            _lastExpandedSettingsWidth = _settingsWidth;
+    }
+
+    private void UpdateSplitterAlignment()
+    {
+        var atRightEdge = !_feedCollapsed && _settingsWidth >= GetMaxSettingsWidth() - 1;
+        var alignment = _feedCollapsed || atRightEdge ? HorizontalAlignment.Right : HorizontalAlignment.Center;
+        CollapseButton.HorizontalAlignment = alignment;
+        SplitterLine.HorizontalAlignment = alignment;
     }
 
     // FORK: Main/Settings view switch in the same window — two ToggleButtons

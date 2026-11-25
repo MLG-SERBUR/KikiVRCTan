@@ -12,6 +12,10 @@
             <TextBlock Text="{Binding}" TextWrapping="Wrap" TextAlignment="Center"
                        HorizontalAlignment="Center" VerticalAlignment="Center" />
         </DataTemplate>
+        <DataTemplate x:Key="QuickButtonTextTemplate">
+            <TextBlock Text="{Binding}" TextWrapping="Wrap" TextAlignment="Left"
+                       HorizontalAlignment="Stretch" VerticalAlignment="Center" />
+        </DataTemplate>
                         <DataTemplate x:Key="FeedItemTemplate" x:DataType="local:FeedItemView">
             <Border BorderThickness="3,0,0,0" BorderBrush="{x:Bind Accent}" Padding="6,4,6,4" Margin="0,0,0,2"
                     HorizontalAlignment="Stretch" Background="{ThemeResource LayerFillColorDefaultBrush}">
@@ -39,7 +43,7 @@
         </Grid.RenderTransform>
         <Grid.ColumnDefinitions>
             <ColumnDefinition x:Name="SettingsColumn" Width="320" />
-            <ColumnDefinition Width="20" />
+            <ColumnDefinition x:Name="SplitterColumn" Width="20" />
             <ColumnDefinition x:Name="FeedColumn" Width="*" />
         </Grid.ColumnDefinitions>
 
@@ -116,25 +120,25 @@
                             <ComboBox x:Name="FromComboMain" Grid.Column="1" HorizontalAlignment="Stretch"
                                       DisplayMemberPath="Name" PointerWheelChanged="ComboBox_PointerWheelChanged" />
                         </Grid>
-                        <Grid ColumnSpacing="4" RowSpacing="4" HorizontalAlignment="Stretch">
+                        <Grid ColumnSpacing="4" RowSpacing="4" HorizontalAlignment="Left">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
-                            <Button x:Name="QuickKo" Content="Korean" ContentTemplate="{StaticResource ButtonTextTemplate}"
+                            <Button x:Name="QuickKo" Content="Korean" ContentTemplate="{StaticResource QuickButtonTextTemplate}"
                                     HorizontalAlignment="Left" MinHeight="36" Padding="4" Tag="ko" Click="QuickButton_Click" />
-                            <Button x:Name="QuickJa" Grid.Column="1" Content="Japanese" ContentTemplate="{StaticResource ButtonTextTemplate}"
+                            <Button x:Name="QuickJa" Grid.Column="1" Content="Japanese" ContentTemplate="{StaticResource QuickButtonTextTemplate}"
                                     HorizontalAlignment="Left" MinHeight="36" Padding="4" Tag="ja" Click="QuickButton_Click" />
-                            <Button x:Name="QuickZh" Grid.Column="2" Content="Chinese" ContentTemplate="{StaticResource ButtonTextTemplate}"
+                            <Button x:Name="QuickZh" Grid.Column="2" Content="Chinese" ContentTemplate="{StaticResource QuickButtonTextTemplate}"
                                     HorizontalAlignment="Left" MinHeight="36" Padding="4" Tag="zh" Click="QuickButton_Click" />
-                            <Button x:Name="QuickAr" Grid.Row="1" Content="Arabic" ContentTemplate="{StaticResource ButtonTextTemplate}"
+                            <Button x:Name="QuickAr" Grid.Row="1" Content="Arabic" ContentTemplate="{StaticResource QuickButtonTextTemplate}"
                                     HorizontalAlignment="Left" MinHeight="36" Padding="4" Tag="ar" Click="QuickButton_Click" />
-                            <Button x:Name="QuickEs" Grid.Row="1" Grid.Column="1" Content="Spanish" ContentTemplate="{StaticResource ButtonTextTemplate}"
+                            <Button x:Name="QuickEs" Grid.Row="1" Grid.Column="1" Content="Spanish" ContentTemplate="{StaticResource QuickButtonTextTemplate}"
                                     HorizontalAlignment="Left" MinHeight="36" Padding="4" Tag="es" Click="QuickButton_Click" />
                         </Grid>
                     </StackPanel>
