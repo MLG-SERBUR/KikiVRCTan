@@ -71,6 +71,7 @@ public sealed partial class MainPage : Page
         _engine = App.Engine ?? throw new InvalidOperationException("AppEngine not initialized");
         _cfg = AppConfig.ConfigObject;
         this.InitializeComponent();
+        UpdateSettingsContentWidth();
 
         _typingTimer.Tick += (_, _) => StopTypingIndicator();
         _sendClearTimer.Tick += (_, _) => ResendTypingFalse();
@@ -135,6 +136,13 @@ public sealed partial class MainPage : Page
         RootGrid.Height = ActualHeight / _uiFactor;
     }
 
+    private void UpdateSettingsContentWidth()
+    {
+        ViewSelector.MaxWidth = _settingsWidth;
+        MainScroll.MaxWidth = _settingsWidth;
+        SettingsScroll.MaxWidth = _settingsWidth;
+    }
+
     private void SplitterThumb_DragDelta(object sender, DragDeltaEventArgs e)
     {
         // Dragging the strip re-opens a hidden feed. Keep its pane width at
@@ -147,6 +155,7 @@ public sealed partial class MainPage : Page
         }
         _settingsWidth = Math.Clamp(_settingsWidth + e.HorizontalChange, 200, 600);
         SettingsColumn.Width = new GridLength(_settingsWidth);
+        UpdateSettingsContentWidth();
     }
 
     // FORK: the divider button hides the FEED (the log), not the settings —
@@ -181,6 +190,7 @@ public sealed partial class MainPage : Page
         if (_collapseStartedCollapsed) return;
         _settingsWidth = Math.Clamp(_collapseStartWidth + dx, 200, 600);
         SettingsColumn.Width = new GridLength(_settingsWidth);
+        UpdateSettingsContentWidth();
     }
 
     private void CollapseButton_PointerReleased(object sender, PointerRoutedEventArgs e)
@@ -204,10 +214,12 @@ public sealed partial class MainPage : Page
         _feedCollapsed = collapsed;
         FeedScroll.Visibility = collapsed ? Visibility.Collapsed : Visibility.Visible;
         FeedColumn.Width = collapsed ? new GridLength(0) : new GridLength(1, GridUnitType.Star);
-        // Keep the controls at their normal width when the feed is hidden.
-        // Stretching this column to fill the whole window made the main page
-        // controls run off-screen on some window sizes and UI scales.
-        SettingsColumn.Width = new GridLength(_settingsWidth);
+        // Move the divider to the window edge when hiding the feed. The view
+        // content keeps its splitter-sized maximum width so controls do not
+        // stretch or clip across the expanded column.
+        SettingsColumn.Width = collapsed
+            ? new GridLength(1, GridUnitType.Star)
+            : new GridLength(_settingsWidth);
         CollapseGlyph.Text = collapsed ? "‹" : "›";
     }
 

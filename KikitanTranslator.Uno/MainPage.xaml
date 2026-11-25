@@ -44,7 +44,8 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-            <Grid Margin="8,8,8,4" ColumnSpacing="4">
+            <Grid x:Name="ViewSelector" Margin="8,8,8,4" ColumnSpacing="4"
+                  HorizontalAlignment="Left">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
@@ -54,7 +55,8 @@
                 <ToggleButton x:Name="SettingsViewButton" Grid.Column="1" Content="Settings" MinHeight="36" Padding="8,4"
                               HorizontalAlignment="Stretch" Click="SettingsViewButton_Click" />
             </Grid>
-            <ScrollViewer x:Name="MainScroll" Grid.Row="1" HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled">
+            <ScrollViewer x:Name="MainScroll" Grid.Row="1" HorizontalAlignment="Left"
+                          HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled">
                 <StackPanel Padding="8" Spacing="12">
                     <StackPanel HorizontalAlignment="Stretch" Spacing="6">
                         <Grid ColumnSpacing="6" RowSpacing="6">
@@ -133,7 +135,8 @@
                     </StackPanel>
                 </StackPanel>
             </ScrollViewer>
-            <ScrollViewer x:Name="SettingsScroll" Grid.Row="1" HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled" Visibility="Collapsed">
+            <ScrollViewer x:Name="SettingsScroll" Grid.Row="1" HorizontalAlignment="Left"
+                          HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled" Visibility="Collapsed">
                 <StackPanel Padding="8">
                 <Expander HorizontalAlignment="Stretch" Margin="0,0,0,8">
                     <Expander.Header>
