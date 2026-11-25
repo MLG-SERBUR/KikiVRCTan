@@ -64,6 +64,7 @@ public static class UiLanguage
         ["en"] = new()
         {
             ["Main"] = "Main",
+            ["Settings"] = "Settings",
             ["FeedYou"] = "You",
             ["FeedIncoming"] = "Incoming",
             ["Voice"] = "Voice",
@@ -124,6 +125,7 @@ public static class UiLanguage
         ["ko"] = new()
         {
             ["Main"] = "메인",
+            ["Settings"] = "설정",
             ["FeedYou"] = "나",
             ["FeedIncoming"] = "수신",
             ["Voice"] = "음성",
@@ -184,6 +186,7 @@ public static class UiLanguage
         ["ja"] = new()
         {
             ["Main"] = "メイン",
+            ["Settings"] = "設定",
             ["FeedYou"] = "自分",
             ["FeedIncoming"] = "受信",
             ["Voice"] = "音声",
@@ -244,6 +247,7 @@ public static class UiLanguage
         ["zh"] = new()
         {
             ["Main"] = "主页",
+            ["Settings"] = "设置",
             ["FeedYou"] = "我",
             ["FeedIncoming"] = "传入",
             ["Voice"] = "语音",
@@ -304,6 +308,7 @@ public static class UiLanguage
         ["ar"] = new()
         {
             ["Main"] = "الرئيسية",
+            ["Settings"] = "الإعدادات",
             ["FeedYou"] = "أنا",
             ["FeedIncoming"] = "وارد",
             ["Voice"] = "الصوت",
@@ -364,6 +369,7 @@ public static class UiLanguage
         ["es"] = new()
         {
             ["Main"] = "Principal",
+            ["Settings"] = "Configuración",
             ["FeedYou"] = "Yo",
             ["FeedIncoming"] = "Entrante",
             ["Voice"] = "Voz",
@@ -424,6 +430,7 @@ public static class UiLanguage
         ["ru"] = new()
         {
             ["Main"] = "Главная",
+            ["Settings"] = "Настройки",
             ["FeedYou"] = "Вы",
             ["FeedIncoming"] = "Входящее",
             ["Voice"] = "Голос",

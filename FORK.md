@@ -38,12 +38,14 @@ the `KikitanTranslator.WinForms` project is deleted.
   which killed both the tap and the drag. Press and drag it to resize the
   settings column, tap it to hide/show the log; the 20px strip stays
   grabbable by touch either way.
-  One scrolling page of VRCT-style collapsible sections instead of tabs:
-  Control (Start/Stop, Send text + the Send to chatbox toggle),
-  Languages (target-language quick buttons), Voice (speech:
-  From/To/recognizer/translator/mic), VRChat, Overlay, API keys, and
-  Display. Control, Send text, and Languages start expanded; the rest
-  start collapsed. The quick
+  One scrolling page of VRCT-style collapsible sections instead of tabs,
+  split into two views in the same window: Main (Control, Send text,
+  Languages — all start expanded) and Settings (Voice, VRChat, Overlay,
+  API keys, Display — all start collapsed), switched by two toggle
+  buttons pinned at the top of the left column. Control holds Start/Stop
+  and Send text + the Send to chatbox toggle; Languages holds the
+  target-language quick buttons. Voice holds speech: From/To/recognizer/
+  translator/mic. The quick
   buttons switch the target language in one tap — Korean, Japanese,
   Chinese, Arabic, Spanish, in that order — through the same path as the
   To dropdown, with the active one bolded. A dropdown never changes on

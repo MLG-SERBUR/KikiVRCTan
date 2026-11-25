@@ -38,330 +38,350 @@
             <ColumnDefinition x:Name="FeedColumn" Width="*" />
         </Grid.ColumnDefinitions>
 
-        <ScrollViewer Grid.Column="0" HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled">
-            <StackPanel Padding="8">
-            <Expander HorizontalAlignment="Stretch" Margin="0,0,0,8" IsExpanded="True">
-                <Expander.Header>
-                    <TextBlock x:Name="ControlGroupHeader" FontWeight="SemiBold" Text="Control" />
-                </Expander.Header>
-                <StackPanel>
-                    <Grid ColumnSpacing="6" RowSpacing="6">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-                        <Button x:Name="StartStopButton" Content="Start" ContentTemplate="{StaticResource ButtonTextTemplate}"
-                                MinHeight="36" Padding="8,4" Click="StartStopButton_Click" />
-                        <Button x:Name="ClearFeedButton" Grid.Column="1" Content="Clear feed" ContentTemplate="{StaticResource ButtonTextTemplate}"
-                                MinHeight="36" Padding="8,4" Click="ClearFeedButton_Click" />
-                        <Button x:Name="LangButton" Grid.Row="1" Grid.ColumnSpan="2" MinHeight="36" Padding="8,4" Click="LangButton_Click">
-                            <Grid ColumnSpacing="6">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <Image x:Name="LangFlag" Width="24" Height="18" Stretch="Uniform" />
-                                <TextBlock x:Name="LangName" Grid.Column="1" VerticalAlignment="Center" Text="English" TextWrapping="Wrap" />
-                            </Grid>
-                        </Button>
-                    </Grid>
-                    <TextBlock x:Name="StatusText" Text="Stopped" Margin="0,6,0,0" />
-                    <TextBlock x:Name="MutedText" Foreground="{ThemeResource SystemFillColorCriticalBrush}" Margin="0,2,0,0" />
-                    <Button x:Name="UpdateButton" Content="Restart to update" ContentTemplate="{StaticResource ButtonTextTemplate}"
-                            HorizontalAlignment="Stretch" MinHeight="36" Padding="8,4" Margin="0,6,0,0"
-                            Visibility="Collapsed" Click="UpdateButton_Click" />
-                </StackPanel>
-            </Expander>
-            <Expander HorizontalAlignment="Stretch" Margin="0,0,0,8" IsExpanded="True">
-                <Expander.Header>
-                    <TextBlock x:Name="SendTextGroupHeader" FontWeight="SemiBold" Text="Send text" />
-                </Expander.Header>
-                <StackPanel>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <TextBox x:Name="ManualBox" KeyDown="ManualBox_KeyDown" TextChanged="ManualBox_TextChanged" />
-                        <Button x:Name="SendButton" Grid.Column="1" Content="Send" ContentTemplate="{StaticResource ButtonTextTemplate}"
-                                Width="76" MinHeight="36" Padding="6,4" Margin="6,0,0,0" Click="SendButton_Click" />
-                    </Grid>
-                    <CheckBox x:Name="SendToChatboxBox" Content="Send to chatbox" Margin="0,6,0,0" />
-                </StackPanel>
-            </Expander>
-            <Expander HorizontalAlignment="Stretch" Margin="0,0,0,8" IsExpanded="True">
-                <Expander.Header>
-                    <TextBlock x:Name="LanguagesGroupHeader" FontWeight="SemiBold" Text="Languages" />
-                </Expander.Header>
-                <StackPanel>
-                    <Grid Margin="0,0,0,6">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="100" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock x:Name="FromMainLabel" Text="From:" VerticalAlignment="Center" />
-                        <ComboBox x:Name="FromComboMain" Grid.Column="1" HorizontalAlignment="Stretch"
-                                  DisplayMemberPath="Name" PointerWheelChanged="ComboBox_PointerWheelChanged" />
-                    </Grid>
-                    <Grid ColumnSpacing="4" RowSpacing="4">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-                        <Button x:Name="QuickKo" Content="Korean" ContentTemplate="{StaticResource ButtonTextTemplate}"
-                                MinHeight="36" Padding="4" Tag="ko" Click="QuickButton_Click" />
-                        <Button x:Name="QuickJa" Grid.Column="1" Content="Japanese" ContentTemplate="{StaticResource ButtonTextTemplate}"
-                                MinHeight="36" Padding="4" Tag="ja" Click="QuickButton_Click" />
-                        <Button x:Name="QuickZh" Grid.Column="2" Content="Chinese" ContentTemplate="{StaticResource ButtonTextTemplate}"
-                                MinHeight="36" Padding="4" Tag="zh" Click="QuickButton_Click" />
-                        <Button x:Name="QuickAr" Grid.Row="1" Content="Arabic" ContentTemplate="{StaticResource ButtonTextTemplate}"
-                                MinHeight="36" Padding="4" Tag="ar" Click="QuickButton_Click" />
-                        <Button x:Name="QuickEs" Grid.Row="1" Grid.Column="1" Content="Spanish" ContentTemplate="{StaticResource ButtonTextTemplate}"
-                                MinHeight="36" Padding="4" Tag="es" Click="QuickButton_Click" />
-                    </Grid>
-                </StackPanel>
-            </Expander>
-            <Expander HorizontalAlignment="Stretch" Margin="0,0,0,8">
-                <Expander.Header>
-                    <TextBlock x:Name="VoiceGroupHeader" FontWeight="SemiBold" Text="Voice" />
-                </Expander.Header>
-                <StackPanel>
-                    <Grid Margin="0,0,0,6">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="100" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock x:Name="FromVoiceLabel" Text="From:" VerticalAlignment="Center" />
-                        <ComboBox x:Name="FromComboSettings" Grid.Column="1" HorizontalAlignment="Stretch"
-                                  DisplayMemberPath="Name" PointerWheelChanged="ComboBox_PointerWheelChanged" />
-                    </Grid>
-                    <Grid Margin="0,0,0,6">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="100" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock x:Name="ToLabel" Text="To:" VerticalAlignment="Center" />
-                        <ComboBox x:Name="TargetCombo" Grid.Column="1" HorizontalAlignment="Stretch"
-                                  DisplayMemberPath="Name" PointerWheelChanged="ComboBox_PointerWheelChanged" />
-                    </Grid>
-                    <Grid Margin="0,0,0,6">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="100" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock x:Name="RecognizerLabel" Text="Recognizer:" VerticalAlignment="Center" />
-                        <ComboBox x:Name="RecognizerCombo" Grid.Column="1" HorizontalAlignment="Stretch"
-                                  DisplayMemberPath="Name" PointerWheelChanged="ComboBox_PointerWheelChanged" />
-                    </Grid>
-                    <Grid Margin="0,0,0,6">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="100" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock x:Name="TranslatorLabel" Text="Translator:" VerticalAlignment="Center" />
-                        <ComboBox x:Name="TranslatorCombo" Grid.Column="1" HorizontalAlignment="Stretch"
-                                  DisplayMemberPath="Name" PointerWheelChanged="ComboBox_PointerWheelChanged" />
-                    </Grid>
-                    <Grid Margin="0,0,0,6">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="100" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock x:Name="MicLabel" Text="Mic:" VerticalAlignment="Center" />
-                        <Grid Grid.Column="1">
+        <Grid Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid Margin="8,8,8,4" ColumnSpacing="4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <ToggleButton x:Name="MainViewButton" Content="Main" MinHeight="36" Padding="8,4"
+                              HorizontalAlignment="Stretch" IsChecked="True" Click="MainViewButton_Click" />
+                <ToggleButton x:Name="SettingsViewButton" Grid.Column="1" Content="Settings" MinHeight="36" Padding="8,4"
+                              HorizontalAlignment="Stretch" Click="SettingsViewButton_Click" />
+            </Grid>
+            <ScrollViewer x:Name="MainScroll" Grid.Row="1" HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled">
+                <StackPanel Padding="8">
+                <Expander HorizontalAlignment="Stretch" Margin="0,0,0,8" IsExpanded="True">
+                    <Expander.Header>
+                        <TextBlock x:Name="ControlGroupHeader" FontWeight="SemiBold" Text="Control" />
+                    </Expander.Header>
+                    <StackPanel>
+                        <Grid ColumnSpacing="6" RowSpacing="6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Button x:Name="StartStopButton" Content="Start" ContentTemplate="{StaticResource ButtonTextTemplate}"
+                                    MinHeight="36" Padding="8,4" Click="StartStopButton_Click" />
+                            <Button x:Name="ClearFeedButton" Grid.Column="1" Content="Clear feed" ContentTemplate="{StaticResource ButtonTextTemplate}"
+                                    MinHeight="36" Padding="8,4" Click="ClearFeedButton_Click" />
+                            <Button x:Name="LangButton" Grid.Row="1" Grid.ColumnSpan="2" MinHeight="36" Padding="8,4" Click="LangButton_Click">
+                                <Grid ColumnSpacing="6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Image x:Name="LangFlag" Width="24" Height="18" Stretch="Uniform" />
+                                    <TextBlock x:Name="LangName" Grid.Column="1" VerticalAlignment="Center" Text="English" TextWrapping="Wrap" />
+                                </Grid>
+                            </Button>
+                        </Grid>
+                        <TextBlock x:Name="StatusText" Text="Stopped" Margin="0,6,0,0" />
+                        <TextBlock x:Name="MutedText" Foreground="{ThemeResource SystemFillColorCriticalBrush}" Margin="0,2,0,0" />
+                        <Button x:Name="UpdateButton" Content="Restart to update" ContentTemplate="{StaticResource ButtonTextTemplate}"
+                                HorizontalAlignment="Stretch" MinHeight="36" Padding="8,4" Margin="0,6,0,0"
+                                Visibility="Collapsed" Click="UpdateButton_Click" />
+                    </StackPanel>
+                </Expander>
+                <Expander HorizontalAlignment="Stretch" Margin="0,0,0,8" IsExpanded="True">
+                    <Expander.Header>
+                        <TextBlock x:Name="SendTextGroupHeader" FontWeight="SemiBold" Text="Send text" />
+                    </Expander.Header>
+                    <StackPanel>
+                        <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-                            <ComboBox x:Name="MicCombo" HorizontalAlignment="Stretch"
-                                      PointerWheelChanged="ComboBox_PointerWheelChanged" />
-                            <Button x:Name="MicRefreshButton" Grid.Column="1" Content="Refresh" ContentTemplate="{StaticResource ButtonTextTemplate}"
-                                    Width="80" MinHeight="36" Padding="6,4"
-                                    Margin="4,0,0,0" Click="MicRefreshButton_Click" />
+                            <TextBox x:Name="ManualBox" KeyDown="ManualBox_KeyDown" TextChanged="ManualBox_TextChanged" />
+                            <Button x:Name="SendButton" Grid.Column="1" Content="Send" ContentTemplate="{StaticResource ButtonTextTemplate}"
+                                    Width="76" MinHeight="36" Padding="6,4" Margin="6,0,0,0" Click="SendButton_Click" />
                         </Grid>
-                    </Grid>
-                    <CheckBox x:Name="ShowTranscriptionBox" Content="Show transcription" />
-                    <CheckBox x:Name="TranslateMySpeechBox" Content="Translate my speech" />
-                    <CheckBox x:Name="TranslateIncomingBox" Content="Translate incoming speech" />
-                    <CheckBox x:Name="TranscriptionOnlyBox" Content="Transcription only (no translation)" />
-                </StackPanel>
-            </Expander>
-            <Expander HorizontalAlignment="Stretch" Margin="0,0,0,8">
-                <Expander.Header>
-                    <TextBlock x:Name="VrChatGroupHeader" FontWeight="SemiBold" Text="VRChat" />
-                </Expander.Header>
-                <StackPanel>
-                    <CheckBox x:Name="TranslationOnlyBox" Content="Translation only (no original)" />
-                    <CheckBox x:Name="SendWithoutWaitingBox" Content="Send without waiting for finish" />
-                    <CheckBox x:Name="DisableWhenMutedBox" Content="Disable when muted" />
-                    <CheckBox x:Name="SendUserDataBox" Content="Send user data (OSC)" />
-                </StackPanel>
-            </Expander>
-            <Expander HorizontalAlignment="Stretch" Margin="0,0,0,8">
-                <Expander.Header>
-                    <TextBlock x:Name="OverlayGroupHeader" FontWeight="SemiBold" Text="Overlay" />
-                </Expander.Header>
-                <StackPanel>
-                    <CheckBox x:Name="DesktopOverlayBox" Content="Desktop overlay" />
-                    <CheckBox x:Name="ShowOriginalBox" Content="Show original text" />
-                    <CheckBox x:Name="ShowOwnMicBox" Content="Show own mic in feed" />
-                    <Grid Margin="0,6,0,6">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="100" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock x:Name="AnchorLabel" Text="Anchor:" VerticalAlignment="Center" />
-                        <ComboBox x:Name="AnchorCombo" Grid.Column="1" HorizontalAlignment="Stretch"
-                                  DisplayMemberPath="Name" PointerWheelChanged="ComboBox_PointerWheelChanged" />
-                    </Grid>
-                    <Grid Margin="0,0,0,6">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="100" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock x:Name="MaxEntriesLabel" Text="Max entries:" VerticalAlignment="Center" />
-                        <NumberBox x:Name="MaxEntriesBox" Grid.Column="1" Minimum="1" Maximum="12" SmallChange="1"
-                                   SpinButtonPlacementMode="Inline" />
-                    </Grid>
-                    <Grid Margin="0,0,0,6">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="100" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock x:Name="OverlayFontSizeLabel" Text="Font size:" VerticalAlignment="Center" />
-                        <NumberBox x:Name="OverlayFontSizeBox" Grid.Column="1" Minimum="24" Maximum="160" SmallChange="1"
-                                   SpinButtonPlacementMode="Inline" />
-                    </Grid>
-                    <Grid Margin="0,0,0,6">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="100" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock x:Name="WidthCmLabel" Text="Width (cm):" VerticalAlignment="Center" />
-                        <NumberBox x:Name="WidthCmBox" Grid.Column="1" Minimum="40" Maximum="200" SmallChange="1"
-                                   SpinButtonPlacementMode="Inline" />
-                    </Grid>
-                    <Grid Margin="0,0,0,6">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="100" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock x:Name="OpacityLabel" Text="Opacity %:" VerticalAlignment="Center" />
-                        <Grid Grid.Column="1">
+                        <CheckBox x:Name="SendToChatboxBox" Content="Send to chatbox" Margin="0,6,0,0" />
+                    </StackPanel>
+                </Expander>
+                <Expander HorizontalAlignment="Stretch" Margin="0,0,0,8" IsExpanded="True">
+                    <Expander.Header>
+                        <TextBlock x:Name="LanguagesGroupHeader" FontWeight="SemiBold" Text="Languages" />
+                    </Expander.Header>
+                    <StackPanel>
+                        <Grid Margin="0,0,0,6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="FromMainLabel" Text="From:" VerticalAlignment="Center" />
+                            <ComboBox x:Name="FromComboMain" Grid.Column="1" HorizontalAlignment="Stretch"
+                                      DisplayMemberPath="Name" PointerWheelChanged="ComboBox_PointerWheelChanged" />
+                        </Grid>
+                        <Grid ColumnSpacing="4" RowSpacing="4">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="44" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
-                            <Slider x:Name="OpacitySlider" Minimum="10" Maximum="100" StepFrequency="1" />
-                            <TextBlock x:Name="OpacityValueLabel" Grid.Column="1" VerticalAlignment="Center" Text="100%" />
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Button x:Name="QuickKo" Content="Korean" ContentTemplate="{StaticResource ButtonTextTemplate}"
+                                    MinHeight="36" Padding="4" Tag="ko" Click="QuickButton_Click" />
+                            <Button x:Name="QuickJa" Grid.Column="1" Content="Japanese" ContentTemplate="{StaticResource ButtonTextTemplate}"
+                                    MinHeight="36" Padding="4" Tag="ja" Click="QuickButton_Click" />
+                            <Button x:Name="QuickZh" Grid.Column="2" Content="Chinese" ContentTemplate="{StaticResource ButtonTextTemplate}"
+                                    MinHeight="36" Padding="4" Tag="zh" Click="QuickButton_Click" />
+                            <Button x:Name="QuickAr" Grid.Row="1" Content="Arabic" ContentTemplate="{StaticResource ButtonTextTemplate}"
+                                    MinHeight="36" Padding="4" Tag="ar" Click="QuickButton_Click" />
+                            <Button x:Name="QuickEs" Grid.Row="1" Grid.Column="1" Content="Spanish" ContentTemplate="{StaticResource ButtonTextTemplate}"
+                                    MinHeight="36" Padding="4" Tag="es" Click="QuickButton_Click" />
                         </Grid>
-                    </Grid>
-                    <Grid Margin="0,0,0,6">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="100" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock x:Name="DisplaySecLabel" Text="Display sec (0=always):" VerticalAlignment="Center" TextWrapping="Wrap" />
-                        <NumberBox x:Name="DisplaySecBox" Grid.Column="1" Minimum="0" Maximum="3600" SmallChange="1"
-                                   SpinButtonPlacementMode="Inline" />
-                    </Grid>
-                    <Grid Margin="0,0,0,6">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="100" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock x:Name="FadeoutSecLabel" Text="Fadeout sec:" VerticalAlignment="Center" />
-                        <NumberBox x:Name="FadeoutSecBox" Grid.Column="1" Minimum="0" Maximum="30" SmallChange="1"
-                                   SpinButtonPlacementMode="Inline" />
-                    </Grid>
-                    <Grid Margin="0,0,0,6">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="100" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock x:Name="PosXLabel" Text="Pos X (m):" VerticalAlignment="Center" />
-                        <NumberBox x:Name="PosXBox" Grid.Column="1" Minimum="-2" Maximum="2" SmallChange="0.05"
-                                   SpinButtonPlacementMode="Inline" />
-                    </Grid>
-                    <Grid Margin="0,0,0,6">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="100" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock x:Name="PosYLabel" Text="Pos Y (m):" VerticalAlignment="Center" />
-                        <NumberBox x:Name="PosYBox" Grid.Column="1" Minimum="-2" Maximum="2" SmallChange="0.05"
-                                   SpinButtonPlacementMode="Inline" />
-                    </Grid>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="100" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock x:Name="PosZLabel" Text="Pos Z (m):" VerticalAlignment="Center" />
-                        <NumberBox x:Name="PosZBox" Grid.Column="1" Minimum="-2" Maximum="2" SmallChange="0.05"
-                                   SpinButtonPlacementMode="Inline" />
-                    </Grid>
+                    </StackPanel>
+                </Expander>
                 </StackPanel>
-            </Expander>
-            <Expander HorizontalAlignment="Stretch" Margin="0,0,0,8">
-                <Expander.Header>
-                    <TextBlock x:Name="ApiKeysGroupHeader" FontWeight="SemiBold" Text="API keys" />
-                </Expander.Header>
-                <StackPanel>
-                    <Grid Margin="0,0,0,6">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="100" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock x:Name="GroqLabel" Text="Groq:" VerticalAlignment="Center" />
-                        <PasswordBox x:Name="GroqKeyBox" Grid.Column="1" />
-                    </Grid>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="100" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock x:Name="GeminiLabel" Text="Gemini:" VerticalAlignment="Center" />
-                        <PasswordBox x:Name="GeminiKeyBox" Grid.Column="1" />
-                    </Grid>
+            </ScrollViewer>
+            <ScrollViewer x:Name="SettingsScroll" Grid.Row="1" HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled" Visibility="Collapsed">
+                <StackPanel Padding="8">
+                <Expander HorizontalAlignment="Stretch" Margin="0,0,0,8">
+                    <Expander.Header>
+                        <TextBlock x:Name="VoiceGroupHeader" FontWeight="SemiBold" Text="Voice" />
+                    </Expander.Header>
+                    <StackPanel>
+                        <Grid Margin="0,0,0,6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="FromVoiceLabel" Text="From:" VerticalAlignment="Center" />
+                            <ComboBox x:Name="FromComboSettings" Grid.Column="1" HorizontalAlignment="Stretch"
+                                      DisplayMemberPath="Name" PointerWheelChanged="ComboBox_PointerWheelChanged" />
+                        </Grid>
+                        <Grid Margin="0,0,0,6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="ToLabel" Text="To:" VerticalAlignment="Center" />
+                            <ComboBox x:Name="TargetCombo" Grid.Column="1" HorizontalAlignment="Stretch"
+                                      DisplayMemberPath="Name" PointerWheelChanged="ComboBox_PointerWheelChanged" />
+                        </Grid>
+                        <Grid Margin="0,0,0,6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="RecognizerLabel" Text="Recognizer:" VerticalAlignment="Center" />
+                            <ComboBox x:Name="RecognizerCombo" Grid.Column="1" HorizontalAlignment="Stretch"
+                                      DisplayMemberPath="Name" PointerWheelChanged="ComboBox_PointerWheelChanged" />
+                        </Grid>
+                        <Grid Margin="0,0,0,6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="TranslatorLabel" Text="Translator:" VerticalAlignment="Center" />
+                            <ComboBox x:Name="TranslatorCombo" Grid.Column="1" HorizontalAlignment="Stretch"
+                                      DisplayMemberPath="Name" PointerWheelChanged="ComboBox_PointerWheelChanged" />
+                        </Grid>
+                        <Grid Margin="0,0,0,6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="MicLabel" Text="Mic:" VerticalAlignment="Center" />
+                            <Grid Grid.Column="1">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <ComboBox x:Name="MicCombo" HorizontalAlignment="Stretch"
+                                          PointerWheelChanged="ComboBox_PointerWheelChanged" />
+                                <Button x:Name="MicRefreshButton" Grid.Column="1" Content="Refresh" ContentTemplate="{StaticResource ButtonTextTemplate}"
+                                        Width="80" MinHeight="36" Padding="6,4"
+                                        Margin="4,0,0,0" Click="MicRefreshButton_Click" />
+                            </Grid>
+                        </Grid>
+                        <CheckBox x:Name="ShowTranscriptionBox" Content="Show transcription" />
+                        <CheckBox x:Name="TranslateMySpeechBox" Content="Translate my speech" />
+                        <CheckBox x:Name="TranslateIncomingBox" Content="Translate incoming speech" />
+                        <CheckBox x:Name="TranscriptionOnlyBox" Content="Transcription only (no translation)" />
+                    </StackPanel>
+                </Expander>
+                <Expander HorizontalAlignment="Stretch" Margin="0,0,0,8">
+                    <Expander.Header>
+                        <TextBlock x:Name="VrChatGroupHeader" FontWeight="SemiBold" Text="VRChat" />
+                    </Expander.Header>
+                    <StackPanel>
+                        <CheckBox x:Name="TranslationOnlyBox" Content="Translation only (no original)" />
+                        <CheckBox x:Name="SendWithoutWaitingBox" Content="Send without waiting for finish" />
+                        <CheckBox x:Name="DisableWhenMutedBox" Content="Disable when muted" />
+                        <CheckBox x:Name="SendUserDataBox" Content="Send user data (OSC)" />
+                    </StackPanel>
+                </Expander>
+                <Expander HorizontalAlignment="Stretch" Margin="0,0,0,8">
+                    <Expander.Header>
+                        <TextBlock x:Name="OverlayGroupHeader" FontWeight="SemiBold" Text="Overlay" />
+                    </Expander.Header>
+                    <StackPanel>
+                        <CheckBox x:Name="DesktopOverlayBox" Content="Desktop overlay" />
+                        <CheckBox x:Name="ShowOriginalBox" Content="Show original text" />
+                        <CheckBox x:Name="ShowOwnMicBox" Content="Show own mic in feed" />
+                        <Grid Margin="0,6,0,6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="AnchorLabel" Text="Anchor:" VerticalAlignment="Center" />
+                            <ComboBox x:Name="AnchorCombo" Grid.Column="1" HorizontalAlignment="Stretch"
+                                      DisplayMemberPath="Name" PointerWheelChanged="ComboBox_PointerWheelChanged" />
+                        </Grid>
+                        <Grid Margin="0,0,0,6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="MaxEntriesLabel" Text="Max entries:" VerticalAlignment="Center" />
+                            <NumberBox x:Name="MaxEntriesBox" Grid.Column="1" Minimum="1" Maximum="12" SmallChange="1"
+                                       SpinButtonPlacementMode="Inline" />
+                        </Grid>
+                        <Grid Margin="0,0,0,6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="OverlayFontSizeLabel" Text="Font size:" VerticalAlignment="Center" />
+                            <NumberBox x:Name="OverlayFontSizeBox" Grid.Column="1" Minimum="24" Maximum="160" SmallChange="1"
+                                       SpinButtonPlacementMode="Inline" />
+                        </Grid>
+                        <Grid Margin="0,0,0,6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="WidthCmLabel" Text="Width (cm):" VerticalAlignment="Center" />
+                            <NumberBox x:Name="WidthCmBox" Grid.Column="1" Minimum="40" Maximum="200" SmallChange="1"
+                                       SpinButtonPlacementMode="Inline" />
+                        </Grid>
+                        <Grid Margin="0,0,0,6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="OpacityLabel" Text="Opacity %:" VerticalAlignment="Center" />
+                            <Grid Grid.Column="1">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="44" />
+                                </Grid.ColumnDefinitions>
+                                <Slider x:Name="OpacitySlider" Minimum="10" Maximum="100" StepFrequency="1" />
+                                <TextBlock x:Name="OpacityValueLabel" Grid.Column="1" VerticalAlignment="Center" Text="100%" />
+                            </Grid>
+                        </Grid>
+                        <Grid Margin="0,0,0,6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="DisplaySecLabel" Text="Display sec (0=always):" VerticalAlignment="Center" TextWrapping="Wrap" />
+                            <NumberBox x:Name="DisplaySecBox" Grid.Column="1" Minimum="0" Maximum="3600" SmallChange="1"
+                                       SpinButtonPlacementMode="Inline" />
+                        </Grid>
+                        <Grid Margin="0,0,0,6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="FadeoutSecLabel" Text="Fadeout sec:" VerticalAlignment="Center" />
+                            <NumberBox x:Name="FadeoutSecBox" Grid.Column="1" Minimum="0" Maximum="30" SmallChange="1"
+                                       SpinButtonPlacementMode="Inline" />
+                        </Grid>
+                        <Grid Margin="0,0,0,6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="PosXLabel" Text="Pos X (m):" VerticalAlignment="Center" />
+                            <NumberBox x:Name="PosXBox" Grid.Column="1" Minimum="-2" Maximum="2" SmallChange="0.05"
+                                       SpinButtonPlacementMode="Inline" />
+                        </Grid>
+                        <Grid Margin="0,0,0,6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="PosYLabel" Text="Pos Y (m):" VerticalAlignment="Center" />
+                            <NumberBox x:Name="PosYBox" Grid.Column="1" Minimum="-2" Maximum="2" SmallChange="0.05"
+                                       SpinButtonPlacementMode="Inline" />
+                        </Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="PosZLabel" Text="Pos Z (m):" VerticalAlignment="Center" />
+                            <NumberBox x:Name="PosZBox" Grid.Column="1" Minimum="-2" Maximum="2" SmallChange="0.05"
+                                       SpinButtonPlacementMode="Inline" />
+                        </Grid>
+                    </StackPanel>
+                </Expander>
+                <Expander HorizontalAlignment="Stretch" Margin="0,0,0,8">
+                    <Expander.Header>
+                        <TextBlock x:Name="ApiKeysGroupHeader" FontWeight="SemiBold" Text="API keys" />
+                    </Expander.Header>
+                    <StackPanel>
+                        <Grid Margin="0,0,0,6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="GroqLabel" Text="Groq:" VerticalAlignment="Center" />
+                            <PasswordBox x:Name="GroqKeyBox" Grid.Column="1" />
+                        </Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="GeminiLabel" Text="Gemini:" VerticalAlignment="Center" />
+                            <PasswordBox x:Name="GeminiKeyBox" Grid.Column="1" />
+                        </Grid>
+                    </StackPanel>
+                </Expander>
+                <Expander HorizontalAlignment="Stretch" Margin="0,0,0,8">
+                    <Expander.Header>
+                        <TextBlock x:Name="DisplayGroupHeader" FontWeight="SemiBold" Text="Display" />
+                    </Expander.Header>
+                    <StackPanel>
+                        <Grid Margin="0,0,0,6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="LogSizeLabel" Text="Log size:" VerticalAlignment="Center" />
+                            <NumberBox x:Name="LogSizeBox" Grid.Column="1" Minimum="8" Maximum="24" SmallChange="1"
+                                       SpinButtonPlacementMode="Inline" />
+                        </Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="UiSizeLabel" Text="UI size %:" VerticalAlignment="Center" />
+                            <NumberBox x:Name="UiScaleBox" Grid.Column="1" Minimum="80" Maximum="250" SmallChange="10"
+                                       SpinButtonPlacementMode="Inline" />
+                        </Grid>
+                    </StackPanel>
+                </Expander>
                 </StackPanel>
-            </Expander>
-            <Expander HorizontalAlignment="Stretch" Margin="0,0,0,8">
-                <Expander.Header>
-                    <TextBlock x:Name="DisplayGroupHeader" FontWeight="SemiBold" Text="Display" />
-                </Expander.Header>
-                <StackPanel>
-                    <Grid Margin="0,0,0,6">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="100" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock x:Name="LogSizeLabel" Text="Log size:" VerticalAlignment="Center" />
-                        <NumberBox x:Name="LogSizeBox" Grid.Column="1" Minimum="8" Maximum="24" SmallChange="1"
-                                   SpinButtonPlacementMode="Inline" />
-                    </Grid>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="100" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock x:Name="UiSizeLabel" Text="UI size %:" VerticalAlignment="Center" />
-                        <NumberBox x:Name="UiScaleBox" Grid.Column="1" Minimum="80" Maximum="250" SmallChange="10"
-                                   SpinButtonPlacementMode="Inline" />
-                    </Grid>
-                </StackPanel>
-            </Expander>
-            </StackPanel>
-        </ScrollViewer>
+            </ScrollViewer>
+        </Grid>
 
         <!-- Splitter between the settings tabs and the feed. WinUI has no
              GridSplitter, so a Thumb drives the settings column width — and

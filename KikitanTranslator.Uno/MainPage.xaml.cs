@@ -198,6 +198,24 @@ public sealed partial class MainPage : Page
         CollapseGlyph.Text = collapsed ? "‹" : "›";
     }
 
+    // FORK: Main/Settings view switch in the same window — two ToggleButtons
+    // above the left column flip which ScrollViewer is visible. The Main
+    // view holds the working controls (Control, Send text, Languages);
+    // the Settings view holds Voice, VRChat, Overlay, API keys, Display.
+    private void MainViewButton_Click(object sender, RoutedEventArgs e) =>
+        ShowSettingsView(false);
+
+    private void SettingsViewButton_Click(object sender, RoutedEventArgs e) =>
+        ShowSettingsView(true);
+
+    private void ShowSettingsView(bool settings)
+    {
+        MainScroll.Visibility = settings ? Visibility.Collapsed : Visibility.Visible;
+        SettingsScroll.Visibility = settings ? Visibility.Visible : Visibility.Collapsed;
+        MainViewButton.IsChecked = !settings;
+        SettingsViewButton.IsChecked = settings;
+    }
+
     // FORK: UI-language switcher — a button showing the current language
     // (bundled flag image + native name) with a menu of all seven.
     private void BuildLangMenu()
@@ -224,6 +242,8 @@ public sealed partial class MainPage : Page
 
     private void ApplyUiLanguage()
     {
+        MainViewButton.Content = T("Main");
+        SettingsViewButton.Content = T("Settings");
         ControlGroupHeader.Text = T("Control");
         SendTextGroupHeader.Text = T("Send text");
         LanguagesGroupHeader.Text = T("Languages");
