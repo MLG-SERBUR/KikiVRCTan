@@ -43,9 +43,10 @@ the `KikitanTranslator.WinForms` project is deleted.
   Languages — all start expanded) and Settings (Voice, VRChat, Overlay,
   API keys, Display — all start collapsed), switched by two toggle
   buttons pinned at the top of the left column. Control holds Start/Stop
-  and Send text + the Send to chatbox toggle; Languages holds the
-  target-language quick buttons. Voice holds speech: From/To/recognizer/
-  translator/mic. The quick
+  and Send text; Languages holds the From dropdown, the To dropdown, and
+  the target-language quick buttons under it. Voice holds speech: From/
+  recognizer/translator/mic (the To dropdown lives only in Languages,
+  not duplicated here). The quick
   buttons switch the target language in one tap — Korean, Japanese,
   Chinese, Arabic, Spanish, in that order — through the same path as the
   To dropdown, with the active one bolded. A dropdown never changes on
