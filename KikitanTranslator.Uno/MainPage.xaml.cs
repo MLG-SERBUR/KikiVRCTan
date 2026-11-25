@@ -79,7 +79,7 @@ public sealed partial class MainPage : Page
         FeedScroll.SizeChanged += (_, _) => UpdateFeedViewportWidth();
         FeedScroll.ViewChanged += (_, _) =>
             _stickToBottom = FeedScroll.VerticalOffset >= FeedScroll.ScrollableHeight - 4;
-        SettingsColumn.SizeChanged += (_, _) => UpdateSettingsContentWidth();
+        SettingsPane.SizeChanged += (_, _) => UpdateSettingsContentWidth();
         ViewportGrid.SizeChanged += (_, _) =>
         {
             UpdateRootSize();
@@ -150,7 +150,7 @@ public sealed partial class MainPage : Page
 
     private void UpdateSettingsContentWidth()
     {
-        var paneWidth = SettingsColumn.ActualWidth > 0 ? SettingsColumn.ActualWidth : _settingsWidth;
+        var paneWidth = SettingsPane.ActualWidth > 0 ? SettingsPane.ActualWidth : _settingsWidth;
         ViewSelector.MaxWidth = paneWidth;
         MainScroll.MaxWidth = paneWidth;
         SettingsScroll.MaxWidth = paneWidth;
