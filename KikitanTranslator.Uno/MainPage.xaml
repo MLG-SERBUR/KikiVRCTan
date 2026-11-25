@@ -110,6 +110,15 @@
                             <ComboBox x:Name="FromComboMain" Grid.Column="1" HorizontalAlignment="Stretch"
                                       DisplayMemberPath="Name" PointerWheelChanged="ComboBox_PointerWheelChanged" />
                         </Grid>
+                        <Grid Margin="0,0,0,6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="ToLabel" Text="To:" VerticalAlignment="Center" />
+                            <ComboBox x:Name="TargetCombo" Grid.Column="1" HorizontalAlignment="Stretch"
+                                      DisplayMemberPath="Name" PointerWheelChanged="ComboBox_PointerWheelChanged" />
+                        </Grid>
                         <local:LeftWrapPanel x:Name="QuickButtonsPanel" HorizontalAlignment="Stretch"
                                              ItemSpacing="4" LineSpacing="4">
                             <Button x:Name="QuickKo" Content="Korean" ContentTemplate="{StaticResource QuickButtonTextTemplate}"
@@ -144,15 +153,6 @@
                             </Grid.ColumnDefinitions>
                             <TextBlock x:Name="FromVoiceLabel" Text="From:" VerticalAlignment="Center" />
                             <ComboBox x:Name="FromComboSettings" Grid.Column="1" HorizontalAlignment="Stretch"
-                                      DisplayMemberPath="Name" PointerWheelChanged="ComboBox_PointerWheelChanged" />
-                        </Grid>
-                        <Grid Margin="0,0,0,6">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="100" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock x:Name="ToLabel" Text="To:" VerticalAlignment="Center" />
-                            <ComboBox x:Name="TargetCombo" Grid.Column="1" HorizontalAlignment="Stretch"
                                       DisplayMemberPath="Name" PointerWheelChanged="ComboBox_PointerWheelChanged" />
                         </Grid>
                         <Grid Margin="0,0,0,6">
