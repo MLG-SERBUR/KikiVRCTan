@@ -99,15 +99,25 @@ jobs:
               --title "KikiVRCTan (feed-overlay latest)" `
               --notes "Latest automated build of the feed-overlay branch. Download KikiVRCTan-portable.zip, extract anywhere, run KikiVRCTan.exe."
           }
+          $release = gh api "repos/MLG-SERBUR/KikiVRCTan/releases/tags/$tag" | ConvertFrom-Json
+          $uploadUrl = $release.upload_url -replace '\{\?name,label\}', '?name=KikiVRCTan-portable.zip'
           $uploaded = $false
           for ($attempt = 1; $attempt -le 4; $attempt++) {
-            gh release upload $tag KikiVRCTan-portable.zip version.txt --clobber
+            $assets = gh api "repos/MLG-SERBUR/KikiVRCTan/releases/$($release.id)/assets" | ConvertFrom-Json
+            if ($assets | Where-Object { $_.name -eq "KikiVRCTan-portable.zip" }) {
+              gh release delete-asset $tag KikiVRCTan-portable.zip --yes
+              if ($LASTEXITCODE -ne 0) { throw "Could not remove the previous portable zip" }
+            }
+            curl.exe --fail-with-body --location --silent --show-error --request POST $uploadUrl `
+              --header "Authorization: Bearer $env:GH_TOKEN" `
+              --header "Accept: application/vnd.github+json" `
+              --header "Content-Type: application/zip" `
+              --data-binary "@KikiVRCTan-portable.zip"
             if ($LASTEXITCODE -eq 0) {
               $uploaded = $true
               break
             }
-            if ($attempt -lt 4) {
-              Start-Sleep -Seconds (10 * $attempt)
-            }
+            if ($attempt -lt 4) { Start-Sleep -Seconds (10 * $attempt) }
           }
-          if (-not $uploaded) { throw "Portable release upload failed after 4 attempts" }
+          if (-not $uploaded) { throw "Portable zip upload failed after 4 attempts" }
+          gh release upload $tag version.txt --clobber
