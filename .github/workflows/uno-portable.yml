@@ -99,4 +99,15 @@ jobs:
               --title "KikiVRCTan (feed-overlay latest)" `
               --notes "Latest automated build of the feed-overlay branch. Download KikiVRCTan-portable.zip, extract anywhere, run KikiVRCTan.exe."
           }
-          gh release upload $tag KikiVRCTan-portable.zip version.txt --clobber
+          $uploaded = $false
+          for ($attempt = 1; $attempt -le 4; $attempt++) {
+            gh release upload $tag KikiVRCTan-portable.zip version.txt --clobber
+            if ($LASTEXITCODE -eq 0) {
+              $uploaded = $true
+              break
+            }
+            if ($attempt -lt 4) {
+              Start-Sleep -Seconds (10 * $attempt)
+            }
+          }
+          if (-not $uploaded) { throw "Portable release upload failed after 4 attempts" }
