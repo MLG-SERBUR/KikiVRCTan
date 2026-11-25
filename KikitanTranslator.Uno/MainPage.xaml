@@ -48,19 +48,17 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <ToggleButton x:Name="MainViewButton" Content="Main" MinHeight="36" Padding="8,4"
                               HorizontalAlignment="Stretch" IsChecked="True" Click="MainViewButton_Click" />
                 <ToggleButton x:Name="SettingsViewButton" Grid.Column="1" Content="Settings" MinHeight="36" Padding="8,4"
                               HorizontalAlignment="Stretch" Click="SettingsViewButton_Click" />
-                <Button x:Name="CollapsedFeedButton" Grid.Column="2" Content="‹" Width="36" MinHeight="36"
-                        Padding="0" Background="Transparent" BorderThickness="0"
-                        AutomationProperties.Name="Show feed" ToolTipService.ToolTip="Show feed"
-                        Visibility="Collapsed" Click="CollapsedFeedButton_Click" />
             </Grid>
             <ScrollViewer x:Name="MainScroll" Grid.Row="1" HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled">
                 <StackPanel Padding="8" Spacing="12">
+                    <Button x:Name="CollapsedFeedButton" Content="Show feed" HorizontalAlignment="Stretch"
+                            MinHeight="36" Padding="8,4" Visibility="Collapsed"
+                            Click="CollapsedFeedButton_Click" />
                     <StackPanel HorizontalAlignment="Stretch" Spacing="6">
                         <Grid ColumnSpacing="6" RowSpacing="6">
                             <Grid.ColumnDefinitions>
