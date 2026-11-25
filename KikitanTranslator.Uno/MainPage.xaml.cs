@@ -244,9 +244,6 @@ public sealed partial class MainPage : Page
     {
         MainViewButton.Content = T("Main");
         SettingsViewButton.Content = T("Settings");
-        ControlGroupHeader.Text = T("Control");
-        SendTextGroupHeader.Text = T("Send text");
-        LanguagesGroupHeader.Text = T("Languages");
         DisplayGroupHeader.Text = T("Display");
         VoiceGroupHeader.Text = T("Voice");
         VrChatGroupHeader.Text = T("VRChat");

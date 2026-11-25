@@ -29,6 +29,7 @@
          window size divided by the scale, so the scaled content exactly fills
          the window. Settings column width is adjustable via the splitter. -->
     <Grid x:Name="RootGrid">
+        <Grid.RenderTransformOrigin>0,0</Grid.RenderTransformOrigin>
         <Grid.RenderTransform>
             <ScaleTransform x:Name="AppScale" />
         </Grid.RenderTransform>
@@ -54,12 +55,8 @@
                               HorizontalAlignment="Stretch" Click="SettingsViewButton_Click" />
             </Grid>
             <ScrollViewer x:Name="MainScroll" Grid.Row="1" HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled">
-                <StackPanel Padding="8">
-                <Expander HorizontalAlignment="Stretch" Margin="0,0,0,8" IsExpanded="True">
-                    <Expander.Header>
-                        <TextBlock x:Name="ControlGroupHeader" FontWeight="SemiBold" Text="Control" />
-                    </Expander.Header>
-                    <StackPanel>
+                <StackPanel Padding="8" Spacing="12">
+                    <StackPanel HorizontalAlignment="Stretch" Spacing="6">
                         <Grid ColumnSpacing="6" RowSpacing="6">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
@@ -90,12 +87,7 @@
                                 HorizontalAlignment="Stretch" MinHeight="36" Padding="8,4" Margin="0,6,0,0"
                                 Visibility="Collapsed" Click="UpdateButton_Click" />
                     </StackPanel>
-                </Expander>
-                <Expander HorizontalAlignment="Stretch" Margin="0,0,0,8" IsExpanded="True">
-                    <Expander.Header>
-                        <TextBlock x:Name="SendTextGroupHeader" FontWeight="SemiBold" Text="Send text" />
-                    </Expander.Header>
-                    <StackPanel>
+                    <StackPanel HorizontalAlignment="Stretch" Spacing="6">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
@@ -107,12 +99,7 @@
                         </Grid>
                         <CheckBox x:Name="SendToChatboxBox" Content="Send to chatbox" Margin="0,6,0,0" />
                     </StackPanel>
-                </Expander>
-                <Expander HorizontalAlignment="Stretch" Margin="0,0,0,8" IsExpanded="True">
-                    <Expander.Header>
-                        <TextBlock x:Name="LanguagesGroupHeader" FontWeight="SemiBold" Text="Languages" />
-                    </Expander.Header>
-                    <StackPanel>
+                    <StackPanel HorizontalAlignment="Stretch" Spacing="6">
                         <Grid Margin="0,0,0,6">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="100" />
@@ -144,7 +131,6 @@
                                     MinHeight="36" Padding="4" Tag="es" Click="QuickButton_Click" />
                         </Grid>
                     </StackPanel>
-                </Expander>
                 </StackPanel>
             </ScrollViewer>
             <ScrollViewer x:Name="SettingsScroll" Grid.Row="1" HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled" Visibility="Collapsed">
