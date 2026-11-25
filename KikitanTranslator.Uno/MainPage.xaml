@@ -56,9 +56,6 @@
             </Grid>
             <ScrollViewer x:Name="MainScroll" Grid.Row="1" HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled">
                 <StackPanel Padding="8" Spacing="12">
-                    <Button x:Name="CollapsedFeedButton" Content="Show feed" HorizontalAlignment="Stretch"
-                            MinHeight="36" Padding="8,4" Visibility="Collapsed"
-                            Click="CollapsedFeedButton_Click" />
                     <StackPanel HorizontalAlignment="Stretch" Spacing="6">
                         <Grid ColumnSpacing="6" RowSpacing="6">
                             <Grid.ColumnDefinitions>
@@ -373,16 +370,12 @@
         </Grid>
 
         <!-- Splitter between the settings tabs and the feed. WinUI has no
-             GridSplitter, so a Thumb drives the settings column width — and
-             the button on it is a second drag handle (tap it to hide/show
-             the feed, drag it to resize). -->
+             GridSplitter, so this strip handles resizing. Its visible
+             chevron toggles the feed when tapped. -->
         <Grid Grid.Column="1">
             <Thumb x:Name="SplitterThumb" DragDelta="SplitterThumb_DragDelta" Background="Transparent"
                    HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
             <Border Width="1" HorizontalAlignment="Center" Background="{ThemeResource CardStrokeColorDefaultBrush}" />
-            <!-- Plain Border, not a Button: a Button marks PointerPressed
-                 handled for its own click handling, so the handlers below
-                 never fired and the button ate the drag too. -->
             <Border x:Name="CollapseButton" Width="20" Height="56" HorizontalAlignment="Center" VerticalAlignment="Center"
                     Background="Transparent"
                     PointerPressed="CollapseButton_PointerPressed" PointerMoved="CollapseButton_PointerMoved"

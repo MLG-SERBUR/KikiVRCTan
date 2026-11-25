@@ -194,14 +194,12 @@ public sealed partial class MainPage : Page
         _feedCollapsed = collapsed;
         FeedScroll.Visibility = collapsed ? Visibility.Collapsed : Visibility.Visible;
         FeedColumn.Width = collapsed ? new GridLength(0) : new GridLength(1, GridUnitType.Star);
-        SettingsColumn.Width = collapsed ? new GridLength(1, GridUnitType.Star) : new GridLength(_settingsWidth);
+        // Keep the controls at their normal width when the feed is hidden.
+        // Stretching this column to fill the whole window made the main page
+        // controls run off-screen on some window sizes and UI scales.
+        SettingsColumn.Width = new GridLength(_settingsWidth);
         CollapseGlyph.Text = collapsed ? "‹" : "›";
-        CollapseButton.Visibility = collapsed ? Visibility.Collapsed : Visibility.Visible;
-        CollapsedFeedButton.Visibility = collapsed ? Visibility.Visible : Visibility.Collapsed;
     }
-
-    private void CollapsedFeedButton_Click(object sender, RoutedEventArgs e) =>
-        SetFeedCollapsed(false);
 
     // FORK: Main/Settings view switch in the same window — two ToggleButtons
     // above the left column flip which ScrollViewer is visible. The Main
