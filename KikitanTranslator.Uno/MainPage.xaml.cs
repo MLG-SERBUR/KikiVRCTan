@@ -139,8 +139,6 @@ public sealed partial class MainPage : Page
         if (ActualWidth <= 0 || ActualHeight <= 0) return;
         RootGrid.Width = ActualWidth / _uiFactor;
         RootGrid.Height = ActualHeight / _uiFactor;
-        if (_feedCollapsed)
-            SettingsColumn.Width = new GridLength(Math.Max(0, RootGrid.Width - 20));
     }
 
     private void UpdateFeedViewportWidth()
@@ -231,12 +229,12 @@ public sealed partial class MainPage : Page
         // content keeps its splitter-sized maximum width so controls do not
         // stretch or clip across the expanded column.
         SettingsColumn.Width = collapsed
-            ? new GridLength(Math.Max(0, RootGrid.Width - 20))
+            ? new GridLength(1, GridUnitType.Star)
             : new GridLength(_settingsWidth);
-        var divider = (FrameworkElement)CollapseButton;
-        divider.HorizontalAlignment = collapsed ? HorizontalAlignment.Right : HorizontalAlignment.Center;
-        SplitterLine.HorizontalAlignment = collapsed ? HorizontalAlignment.Right : HorizontalAlignment.Center;
+        SplitterGrid.Visibility = collapsed ? Visibility.Collapsed : Visibility.Visible;
+        CollapsedEdgeHandle.Visibility = collapsed ? Visibility.Visible : Visibility.Collapsed;
         CollapseGlyph.Text = collapsed ? "‹" : "›";
+        CollapsedEdgeGlyph.Text = collapsed ? "‹" : "›";
     }
 
     // FORK: Main/Settings view switch in the same window — two ToggleButtons
