@@ -27,10 +27,8 @@
     <!-- FORK (feed-overlay): the whole page scales with AppConfig.UiScale via
          this root ScaleTransform (80–250%). RootGrid is sized in code to the
          window size divided by the scale, so the scaled content exactly fills
-         the window. Keep both layout and transform anchored at the top-left
-         so resizing the settings column cannot shift controls off-screen.
-         Settings column width is adjustable via the splitter. -->
-    <Grid x:Name="RootGrid" HorizontalAlignment="Left" VerticalAlignment="Top">
+         the window. Settings column width is adjustable via the splitter. -->
+    <Grid x:Name="RootGrid">
         <Grid.RenderTransformOrigin>0,0</Grid.RenderTransformOrigin>
         <Grid.RenderTransform>
             <ScaleTransform x:Name="AppScale" />

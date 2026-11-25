@@ -137,8 +137,14 @@ public sealed partial class MainPage : Page
 
     private void SplitterThumb_DragDelta(object sender, DragDeltaEventArgs e)
     {
-        // Dragging the strip re-opens a hidden feed.
-        if (_feedCollapsed) SetFeedCollapsed(false);
+        // Dragging the strip re-opens a hidden feed. Keep its pane width at
+        // the last expanded size for this gesture so the scaled root does not
+        // reflow while the pointer is captured.
+        if (_feedCollapsed)
+        {
+            SetFeedCollapsed(false);
+            return;
+        }
         _settingsWidth = Math.Clamp(_settingsWidth + e.HorizontalChange, 200, 600);
         SettingsColumn.Width = new GridLength(_settingsWidth);
     }
@@ -169,6 +175,10 @@ public sealed partial class MainPage : Page
             _collapseDragging = true;
             if (_collapseStartedCollapsed) SetFeedCollapsed(false);
         }
+        // A drag from the collapsed edge is a restore gesture. Resizing in
+        // the same gesture shifts the scaled content and can clip its left
+        // edge, so leave the saved pane width alone.
+        if (_collapseStartedCollapsed) return;
         _settingsWidth = Math.Clamp(_collapseStartWidth + dx, 200, 600);
         SettingsColumn.Width = new GridLength(_settingsWidth);
     }
