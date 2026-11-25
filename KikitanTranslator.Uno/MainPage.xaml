@@ -99,7 +99,6 @@
                             <Button x:Name="SendButton" Grid.Column="1" Content="Send" ContentTemplate="{StaticResource ButtonTextTemplate}"
                                     Width="76" MinHeight="36" Padding="6,4" Margin="6,0,0,0" Click="SendButton_Click" />
                         </Grid>
-                        <CheckBox x:Name="SendToChatboxBox" Content="Send to chatbox" Margin="0,6,0,0" />
                     </StackPanel>
                     <StackPanel HorizontalAlignment="Stretch" Spacing="6">
                         <Grid Margin="0,0,0,6">
@@ -207,6 +206,7 @@
                         <CheckBox x:Name="SendWithoutWaitingBox" Content="Send without waiting for finish" />
                         <CheckBox x:Name="DisableWhenMutedBox" Content="Disable when muted" />
                         <CheckBox x:Name="SendUserDataBox" Content="Send user data (OSC)" />
+                        <CheckBox x:Name="SendToChatboxBox" Content="Send to chatbox" />
                     </StackPanel>
                 </Expander>
                 <Expander HorizontalAlignment="Stretch" Margin="0,0,0,8">
