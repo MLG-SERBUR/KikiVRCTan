@@ -104,9 +104,10 @@ jobs:
           $uploaded = $false
           for ($attempt = 1; $attempt -le 4; $attempt++) {
             $assets = gh api "repos/MLG-SERBUR/KikiVRCTan/releases/$($release.id)/assets" | ConvertFrom-Json
-            if ($assets | Where-Object { $_.name -eq "KikiVRCTan-portable.zip" }) {
-              gh release delete-asset $tag KikiVRCTan-portable.zip --yes
-              if ($LASTEXITCODE -ne 0) { throw "Could not remove the previous portable zip" }
+            $previousAssets = @($assets | Where-Object { $_.name -eq "KikiVRCTan-portable.zip" })
+            foreach ($asset in $previousAssets) {
+              $null = gh api --method DELETE "repos/MLG-SERBUR/KikiVRCTan/releases/assets/$($asset.id)"
+              if ($LASTEXITCODE -ne 0) { throw "Could not remove incomplete portable zip asset $($asset.id)" }
             }
             curl.exe --fail-with-body --location --silent --show-error --request POST $uploadUrl `
               --header "Authorization: Bearer $env:GH_TOKEN" `
