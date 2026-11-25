@@ -139,6 +139,8 @@ public sealed partial class MainPage : Page
         if (ActualWidth <= 0 || ActualHeight <= 0) return;
         RootGrid.Width = ActualWidth / _uiFactor;
         RootGrid.Height = ActualHeight / _uiFactor;
+        if (_feedCollapsed)
+            SettingsColumn.Width = new GridLength(Math.Max(0, RootGrid.Width - 20));
     }
 
     private void UpdateFeedViewportWidth()
@@ -229,8 +231,11 @@ public sealed partial class MainPage : Page
         // content keeps its splitter-sized maximum width so controls do not
         // stretch or clip across the expanded column.
         SettingsColumn.Width = collapsed
-            ? new GridLength(1, GridUnitType.Star)
+            ? new GridLength(Math.Max(0, RootGrid.Width - 20))
             : new GridLength(_settingsWidth);
+        var divider = (FrameworkElement)CollapseButton;
+        divider.HorizontalAlignment = collapsed ? HorizontalAlignment.Right : HorizontalAlignment.Center;
+        SplitterLine.HorizontalAlignment = collapsed ? HorizontalAlignment.Right : HorizontalAlignment.Center;
         CollapseGlyph.Text = collapsed ? "‹" : "›";
     }
 
