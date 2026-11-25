@@ -76,9 +76,14 @@ public sealed partial class MainPage : Page
         _typingTimer.Tick += (_, _) => StopTypingIndicator();
         _sendClearTimer.Tick += (_, _) => ResendTypingFalse();
         FeedList.ItemsSource = _feedItems;
+        FeedScroll.SizeChanged += (_, _) => UpdateFeedViewportWidth();
         FeedScroll.ViewChanged += (_, _) =>
             _stickToBottom = FeedScroll.VerticalOffset >= FeedScroll.ScrollableHeight - 4;
-        this.SizeChanged += (_, _) => UpdateRootSize();
+        this.SizeChanged += (_, _) =>
+        {
+            UpdateRootSize();
+            UpdateFeedViewportWidth();
+        };
         this.Unloaded += (_, _) =>
         {
             StopTypingIndicator();
@@ -134,6 +139,12 @@ public sealed partial class MainPage : Page
         if (ActualWidth <= 0 || ActualHeight <= 0) return;
         RootGrid.Width = ActualWidth / _uiFactor;
         RootGrid.Height = ActualHeight / _uiFactor;
+    }
+
+    private void UpdateFeedViewportWidth()
+    {
+        if (FeedScroll.ViewportWidth > 0)
+            FeedList.Width = FeedScroll.ViewportWidth;
     }
 
     private void UpdateSettingsContentWidth()

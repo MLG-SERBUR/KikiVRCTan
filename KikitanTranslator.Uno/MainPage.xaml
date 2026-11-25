@@ -14,9 +14,10 @@
         </DataTemplate>
                         <DataTemplate x:Key="FeedItemTemplate" x:DataType="local:FeedItemView">
             <Border BorderThickness="3,0,0,0" BorderBrush="{x:Bind Accent}" Padding="6,4,6,4" Margin="0,0,0,2"
-                    Background="{ThemeResource LayerFillColorDefaultBrush}">
-                <StackPanel>
-                    <TextBlock Text="{x:Bind Header}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="11" />
+                    HorizontalAlignment="Stretch" Background="{ThemeResource LayerFillColorDefaultBrush}">
+                <StackPanel HorizontalAlignment="Stretch">
+                    <TextBlock Text="{x:Bind Header}" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                               FontSize="11" TextWrapping="Wrap" />
                     <TextBlock Text="{x:Bind Transcription}" TextWrapping="Wrap" Visibility="{x:Bind TranscriptionVisibility}" />
                     <TextBlock Text="{x:Bind MainText}" TextWrapping="Wrap" />
                 </StackPanel>
@@ -388,7 +389,8 @@
         </Grid>
 
         <ScrollViewer x:Name="FeedScroll" Grid.Column="2" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-            <ItemsRepeater x:Name="FeedList" ItemTemplate="{StaticResource FeedItemTemplate}">
+            <ItemsRepeater x:Name="FeedList" HorizontalAlignment="Stretch"
+                           ItemTemplate="{StaticResource FeedItemTemplate}">
                 <ItemsRepeater.Layout>
                     <StackLayout Orientation="Vertical" />
                 </ItemsRepeater.Layout>
