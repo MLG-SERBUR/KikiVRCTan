@@ -49,7 +49,7 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
             <Grid x:Name="ViewSelector" Margin="8,8,8,4" ColumnSpacing="4"
-                  HorizontalAlignment="Left">
+                  HorizontalAlignment="Stretch">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
@@ -59,7 +59,7 @@
                 <ToggleButton x:Name="SettingsViewButton" Grid.Column="1" Content="Settings" MinHeight="36" Padding="8,4"
                               HorizontalAlignment="Stretch" Click="SettingsViewButton_Click" />
             </Grid>
-            <ScrollViewer x:Name="MainScroll" Grid.Row="1" HorizontalAlignment="Left"
+            <ScrollViewer x:Name="MainScroll" Grid.Row="1" HorizontalAlignment="Stretch"
                           HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled">
                 <StackPanel Padding="8" Spacing="12">
                     <StackPanel HorizontalAlignment="Stretch" Spacing="6">
@@ -94,12 +94,13 @@
                                 Visibility="Collapsed" Click="UpdateButton_Click" />
                     </StackPanel>
                     <StackPanel HorizontalAlignment="Stretch" Spacing="6">
-                        <Grid>
+                        <Grid x:Name="ManualInputGrid" HorizontalAlignment="Stretch">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" MinWidth="0" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-                            <TextBox x:Name="ManualBox" KeyDown="ManualBox_KeyDown" TextChanged="ManualBox_TextChanged" />
+                            <TextBox x:Name="ManualBox" MinWidth="0" HorizontalAlignment="Stretch"
+                                     KeyDown="ManualBox_KeyDown" TextChanged="ManualBox_TextChanged" />
                             <Button x:Name="SendButton" Grid.Column="1" Content="Send" ContentTemplate="{StaticResource ButtonTextTemplate}"
                                     Width="76" MinHeight="36" Padding="6,4" Margin="6,0,0,0" Click="SendButton_Click" />
                         </Grid>
@@ -115,7 +116,7 @@
                             <ComboBox x:Name="FromComboMain" Grid.Column="1" HorizontalAlignment="Stretch"
                                       DisplayMemberPath="Name" PointerWheelChanged="ComboBox_PointerWheelChanged" />
                         </Grid>
-                        <Grid ColumnSpacing="4" RowSpacing="4">
+                        <Grid ColumnSpacing="4" RowSpacing="4" HorizontalAlignment="Stretch">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="*" />
@@ -126,20 +127,20 @@
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
                             <Button x:Name="QuickKo" Content="Korean" ContentTemplate="{StaticResource ButtonTextTemplate}"
-                                    MinHeight="36" Padding="4" Tag="ko" Click="QuickButton_Click" />
+                                    HorizontalAlignment="Left" MinHeight="36" Padding="4" Tag="ko" Click="QuickButton_Click" />
                             <Button x:Name="QuickJa" Grid.Column="1" Content="Japanese" ContentTemplate="{StaticResource ButtonTextTemplate}"
-                                    MinHeight="36" Padding="4" Tag="ja" Click="QuickButton_Click" />
+                                    HorizontalAlignment="Left" MinHeight="36" Padding="4" Tag="ja" Click="QuickButton_Click" />
                             <Button x:Name="QuickZh" Grid.Column="2" Content="Chinese" ContentTemplate="{StaticResource ButtonTextTemplate}"
-                                    MinHeight="36" Padding="4" Tag="zh" Click="QuickButton_Click" />
+                                    HorizontalAlignment="Left" MinHeight="36" Padding="4" Tag="zh" Click="QuickButton_Click" />
                             <Button x:Name="QuickAr" Grid.Row="1" Content="Arabic" ContentTemplate="{StaticResource ButtonTextTemplate}"
-                                    MinHeight="36" Padding="4" Tag="ar" Click="QuickButton_Click" />
+                                    HorizontalAlignment="Left" MinHeight="36" Padding="4" Tag="ar" Click="QuickButton_Click" />
                             <Button x:Name="QuickEs" Grid.Row="1" Grid.Column="1" Content="Spanish" ContentTemplate="{StaticResource ButtonTextTemplate}"
-                                    MinHeight="36" Padding="4" Tag="es" Click="QuickButton_Click" />
+                                    HorizontalAlignment="Left" MinHeight="36" Padding="4" Tag="es" Click="QuickButton_Click" />
                         </Grid>
                     </StackPanel>
                 </StackPanel>
             </ScrollViewer>
-            <ScrollViewer x:Name="SettingsScroll" Grid.Row="1" HorizontalAlignment="Left"
+            <ScrollViewer x:Name="SettingsScroll" Grid.Row="1" HorizontalAlignment="Stretch"
                           HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled" Visibility="Collapsed">
                 <StackPanel Padding="8">
                 <Expander HorizontalAlignment="Stretch" Margin="0,0,0,8">

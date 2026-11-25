@@ -79,6 +79,7 @@ public sealed partial class MainPage : Page
         FeedScroll.SizeChanged += (_, _) => UpdateFeedViewportWidth();
         FeedScroll.ViewChanged += (_, _) =>
             _stickToBottom = FeedScroll.VerticalOffset >= FeedScroll.ScrollableHeight - 4;
+        SettingsColumn.SizeChanged += (_, _) => UpdateSettingsContentWidth();
         ViewportGrid.SizeChanged += (_, _) =>
         {
             UpdateRootSize();
@@ -149,9 +150,11 @@ public sealed partial class MainPage : Page
 
     private void UpdateSettingsContentWidth()
     {
-        ViewSelector.MaxWidth = _settingsWidth;
-        MainScroll.MaxWidth = _settingsWidth;
-        SettingsScroll.MaxWidth = _settingsWidth;
+        var paneWidth = SettingsColumn.ActualWidth > 0 ? SettingsColumn.ActualWidth : _settingsWidth;
+        ViewSelector.MaxWidth = paneWidth;
+        MainScroll.MaxWidth = paneWidth;
+        SettingsScroll.MaxWidth = paneWidth;
+        ManualBox.MaxWidth = Math.Max(0, paneWidth - 16 - SendButton.Width - 6);
     }
 
     private void SplitterThumb_DragDelta(object sender, DragDeltaEventArgs e)
