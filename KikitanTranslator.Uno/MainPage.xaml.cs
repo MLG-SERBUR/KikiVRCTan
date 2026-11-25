@@ -200,6 +200,9 @@ public sealed partial class MainPage : Page
         CollapsedFeedButton.Visibility = collapsed ? Visibility.Visible : Visibility.Collapsed;
     }
 
+    private void CollapsedFeedButton_Click(object sender, RoutedEventArgs e) =>
+        SetFeedCollapsed(false);
+
     // FORK: Main/Settings view switch in the same window — two ToggleButtons
     // above the left column flip which ScrollViewer is visible. The Main
     // view holds the working controls (Control, Send text, Languages);
