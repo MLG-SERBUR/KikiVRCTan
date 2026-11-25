@@ -395,5 +395,16 @@
                 </ItemsRepeater.Layout>
             </ItemsRepeater>
         </ScrollViewer>
+
+        <!-- Keep the restore control at the visible window edge when the
+             feed is hidden and the settings column expands to fill the page. -->
+        <Border x:Name="CollapsedFeedButton" Grid.ColumnSpan="3" Width="32" Height="56"
+                HorizontalAlignment="Right" VerticalAlignment="Center"
+                Background="Transparent" Visibility="Collapsed"
+                PointerPressed="CollapseButton_PointerPressed" PointerMoved="CollapseButton_PointerMoved"
+                PointerReleased="CollapseButton_PointerReleased" PointerCanceled="CollapseButton_PointerCanceled">
+            <TextBlock x:Name="CollapsedFeedGlyph" Text="‹" FontSize="16"
+                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+        </Border>
     </Grid>
 </Page>

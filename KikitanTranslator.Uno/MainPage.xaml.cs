@@ -151,7 +151,7 @@ public sealed partial class MainPage : Page
     // no movement; a drag re-opens a hidden feed first, then resizes.
     private void CollapseButton_PointerPressed(object sender, PointerRoutedEventArgs e)
     {
-        CollapseButton.CapturePointer(e.Pointer);
+        ((UIElement)sender).CapturePointer(e.Pointer);
         _collapsePressed = true;
         _collapseDragging = false;
         _collapseStartedCollapsed = _feedCollapsed;
@@ -175,7 +175,7 @@ public sealed partial class MainPage : Page
 
     private void CollapseButton_PointerReleased(object sender, PointerRoutedEventArgs e)
     {
-        CollapseButton.ReleasePointerCapture(e.Pointer);
+        ((UIElement)sender).ReleasePointerCapture(e.Pointer);
         if (_collapsePressed && !_collapseDragging)
             SetFeedCollapsed(!_collapseStartedCollapsed);
         _collapsePressed = false;
@@ -184,7 +184,7 @@ public sealed partial class MainPage : Page
 
     private void CollapseButton_PointerCanceled(object sender, PointerRoutedEventArgs e)
     {
-        CollapseButton.ReleasePointerCapture(e.Pointer);
+        ((UIElement)sender).ReleasePointerCapture(e.Pointer);
         _collapsePressed = false;
         _collapseDragging = false;
     }
@@ -196,6 +196,8 @@ public sealed partial class MainPage : Page
         FeedColumn.Width = collapsed ? new GridLength(0) : new GridLength(1, GridUnitType.Star);
         SettingsColumn.Width = collapsed ? new GridLength(1, GridUnitType.Star) : new GridLength(_settingsWidth);
         CollapseGlyph.Text = collapsed ? "‹" : "›";
+        CollapseButton.Visibility = collapsed ? Visibility.Collapsed : Visibility.Visible;
+        CollapsedFeedButton.Visibility = collapsed ? Visibility.Visible : Visibility.Collapsed;
     }
 
     // FORK: Main/Settings view switch in the same window — two ToggleButtons
