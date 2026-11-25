@@ -2,7 +2,7 @@
 
 This file applies only to ChatGPT/Codex operating the Windows desktop UI. This is not general repository guidance.
 
-For code changes in this repository, do not build the app locally. Commit and push the change to `feed-overlay` when requested, then let GitHub Actions build and publish the portable release. Check that the workflow and release asset succeeded before asking the user to use the updater. Do not download, install, or manually copy a local build; the app's updater handles deployment.
+For code changes in this repository, do not build the app locally. Commit and push the change to `feed-overlay` when requested, then let GitHub Actions build and publish the portable release. Check that the workflow and release asset succeeded before using the app's updater. Do not download, install, or manually copy a local build; the app's updater handles deployment.
 
 When KikiVRCTan's **Restart to update** button is clicked, the updater closes the current process and launches the replacement. A temporarily missing window is expected and does not mean the update failed.
 
