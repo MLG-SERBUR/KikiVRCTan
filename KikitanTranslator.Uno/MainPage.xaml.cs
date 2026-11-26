@@ -235,7 +235,7 @@ public sealed partial class MainPage : Page
     private void UpdateSettingsContentWidth()
     {
         var paneWidth = SettingsPane.ActualWidth > 0 ? SettingsPane.ActualWidth : _settingsWidth;
-        ViewSelector.MaxWidth = paneWidth;
+        ViewPivot.MaxWidth = paneWidth;
         MainScroll.MaxWidth = paneWidth;
         SettingsScroll.MaxWidth = paneWidth;
         ManualBox.MaxWidth = Math.Max(0, paneWidth - 16 - SendButton.Width - 6);
@@ -349,23 +349,11 @@ public sealed partial class MainPage : Page
         SplitterLine.HorizontalAlignment = alignment;
     }
 
-    // FORK: Main/Settings view switch in the same window — two ToggleButtons
-    // above the left column flip which ScrollViewer is visible. The Main
-    // view holds the working controls (Control, Send text, Languages);
-    // the Settings view holds Voice, VRChat, Overlay, API keys, Display.
-    private void MainViewButton_Click(object sender, RoutedEventArgs e) =>
-        ShowSettingsView(false);
-
-    private void SettingsViewButton_Click(object sender, RoutedEventArgs e) =>
-        ShowSettingsView(true);
-
-    private void ShowSettingsView(bool settings)
-    {
-        MainScroll.Visibility = settings ? Visibility.Collapsed : Visibility.Visible;
-        SettingsScroll.Visibility = settings ? Visibility.Visible : Visibility.Collapsed;
-        MainViewButton.IsChecked = !settings;
-        SettingsViewButton.IsChecked = settings;
-    }
+    // FORK: Main/Settings view switch in the same window — a WinUI Pivot
+    // (the Windows Phone metro pivot) owns the switch; each PivotItem holds
+    // its ScrollViewer, so no code reacts to the switch. Main holds the
+    // working controls (Control, Send text, Languages, Advanced); the
+    // Settings view holds Voice, VRChat, Overlay, API keys, Display.
 
     // FORK: UI-language switcher — a button showing the current language
     // (bundled flag image + native name) with a menu of all seven.
@@ -393,8 +381,8 @@ public sealed partial class MainPage : Page
 
     private void ApplyUiLanguage()
     {
-        MainViewButton.Content = T("Main");
-        SettingsViewButton.Content = T("Settings");
+        MainPivotItem.Header = T("Main");
+        SettingsPivotItem.Header = T("Settings");
         DisplayGroupHeader.Text = T("Display");
         VoiceGroupHeader.Text = T("Voice");
         VrChatGroupHeader.Text = T("VRChat");

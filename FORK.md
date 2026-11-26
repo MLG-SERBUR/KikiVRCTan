@@ -41,8 +41,9 @@ the `KikitanTranslator.WinForms` project is deleted.
   One scrolling page of VRCT-style collapsible sections instead of tabs,
   split into two views in the same window: Main (Control, Send text,
   Languages — all start expanded) and Settings (Voice, VRChat, Overlay,
-  API keys, Display — all start collapsed), switched by two toggle
-  buttons pinned at the top of the left column. Control holds Start/Stop
+  API keys, Display — all start collapsed), switched by a WinUI Pivot at
+  the top of the left column (the Windows Phone metro pivot; each PivotItem
+  holds its view's ScrollViewer, so no code reacts to the switch). Control holds Start/Stop
   and Send text; Languages holds the From dropdown, the To dropdown, and
   the target-language quick buttons under it. Main also holds an Advanced
   expander (starts collapsed) with the translate/transcription and overlay
