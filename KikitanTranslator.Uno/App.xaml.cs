@@ -16,6 +16,9 @@ public partial class App : Application
     /// </summary>
     public App()
     {
+#if UNO_WINAPPSDK
+        WindowsStartup.Initialize();
+#endif
         this.InitializeComponent();
     }
 
@@ -24,6 +27,9 @@ public partial class App : Application
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
         MainWindow = new Window();
+#if UNO_WINAPPSDK
+        MainWindow.Closed += (_, _) => Engine?.Dispose();
+#endif
 
         // Do not repeat app initialization when the Window already has content,
         // just ensure that the window is active

@@ -38,10 +38,11 @@
          CoreCLR runtime is what this app wants. -->
     <UseMonoRuntime Condition="'$(TargetFramework)' == 'net10.0-desktop'">false</UseMonoRuntime>
     <DefineConstants Condition="'$(TargetFramework)' == 'net10.0-desktop'">$(DefineConstants);UNO_SKIA_DESKTOP</DefineConstants>
+    <DefineConstants Condition="'$(TargetFramework)' == 'net10.0-windows10.0.19041'">$(DefineConstants);UNO_WINAPPSDK</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net10.0-desktop'">
-    <Compile Remove="Platforms\Windows\Program.cs" />
+    <Compile Remove="Platforms\Windows\WindowsStartup.cs" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net10.0-windows10.0.19041'">

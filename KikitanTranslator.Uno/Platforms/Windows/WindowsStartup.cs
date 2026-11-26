@@ -1,22 +1,21 @@
 using KikitanTranslator.Base;
 using KikitanTranslator.Utility;
-using Microsoft.UI.Dispatching;
-using Microsoft.UI.Xaml;
-using WinRT;
 
 namespace KikitanTranslator.Uno;
 
-internal class Program
+internal static class WindowsStartup
 {
     private static Mutex? _singleInstance;
 
-    [STAThread]
-    public static void Main(string[] args)
+    public static void Initialize()
     {
         _singleInstance = new Mutex(true, "KikiVRCTan-single-instance", out bool createdNew);
-        if (!createdNew) return;
+        if (!createdNew)
+        {
+            Environment.Exit(0);
+            return;
+        }
 
-        WinRT.ComWrappersSupport.InitializeComWrappers();
         Console.OutputEncoding = System.Text.Encoding.UTF8;
         AppConfig.UseExecutableDirectory = true;
 
@@ -30,15 +29,8 @@ internal class Program
 
         App.InitializeLogging();
 
-        using var engine = new AppEngine();
+        var engine = new AppEngine();
         engine.Initialize();
         App.Engine = engine;
-
-        Application.Start(_ =>
-        {
-            var context = new DispatcherQueueSynchronizationContext(DispatcherQueue.GetForCurrentThread());
-            SynchronizationContext.SetSynchronizationContext(context);
-            _ = new App();
-        });
     }
 }
