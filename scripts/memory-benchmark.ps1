@@ -29,10 +29,10 @@ foreach ($targetHost in $hosts) {
     }
 }
 
-$existingHosts = @(Get-Process -Name "KikiVRCTan", "KikitanTranslator", "KikitanTranslator.Overlay" -ErrorAction SilentlyContinue)
+$existingHosts = @(Get-Process -Name "KikiVRCTan", "KikitanTranslator" -ErrorAction SilentlyContinue)
 if ($existingHosts.Count -gt 0) {
     $runningNames = ($existingHosts | ForEach-Object { "$($_.ProcessName) (PID $($_.Id))" }) -join ", "
-    throw "Close existing KikiVRCTan/WinForms host and overlay processes before testing: $runningNames"
+    throw "Close existing KikiVRCTan/WinForms host processes before testing: $runningNames"
 }
 
 function Get-MemoryCounters([int]$ProcessId) {
@@ -113,13 +113,6 @@ for ($round = 1; $round -le $Rounds; $round++) {
                 }
             }
 
-            Start-Sleep -Seconds 2
-            $overlayProcesses = @(Get-CimInstance Win32_Process `
-                -Filter "Name = 'KikitanTranslator.Overlay.exe'" |
-                Where-Object { $_.ParentProcessId -eq $processId })
-            foreach ($overlay in $overlayProcesses) {
-                Stop-Process -Id $overlay.ProcessId -Force -ErrorAction SilentlyContinue
-            }
         }
     }
 }

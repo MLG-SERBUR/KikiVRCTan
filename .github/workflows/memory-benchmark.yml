@@ -38,19 +38,14 @@ jobs:
           $winforms = Join-Path $env:RUNNER_TEMP "memory-benchmark\winforms"
           dotnet publish .\legacy\KikitanTranslator.WinForms\KikitanTranslator.WinForms.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o $winforms
           if ($LASTEXITCODE -ne 0) { throw "WinForms publish failed" }
-          dotnet publish .\legacy\KikitanTranslator.Overlay\KikitanTranslator.Overlay.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o $winforms
-          if ($LASTEXITCODE -ne 0) { throw "WinForms overlay publish failed" }
 
-      - name: Publish Uno host and overlay
+      - name: Publish Uno host
         env:
           DOTNET_CLI_TELEMETRY_OPTOUT: 1
         run: |
           $uno = Join-Path $env:RUNNER_TEMP "memory-benchmark\uno"
-          $overlay = Join-Path $uno "overlay"
           dotnet publish .\KikitanTranslator.Uno\KikitanTranslator.Uno.csproj -f net10.0-desktop -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o $uno
           if ($LASTEXITCODE -ne 0) { throw "Uno publish failed" }
-          dotnet publish .\KikitanTranslator.Overlay\KikitanTranslator.Overlay.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o $overlay
-          if ($LASTEXITCODE -ne 0) { throw "Uno overlay publish failed" }
 
       - name: Assemble benchmark package
         shell: pwsh
@@ -65,6 +60,7 @@ jobs:
           @"
           WinForms source: 3451b3713774f545ef337003072b0af7d0932438
           Uno source: $env:GITHUB_SHA
+          Overlay executables are excluded to isolate the host process.
           This is a test-only package. It does not publish to a GitHub Release or the app updater.
           "@ | Set-Content (Join-Path $package "build-info.txt")
           $zip = Join-Path $env:RUNNER_TEMP "memory-benchmark\KikiVRCTan-memory-benchmark.zip"
