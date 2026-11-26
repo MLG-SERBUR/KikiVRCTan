@@ -135,6 +135,20 @@
                                     HorizontalAlignment="Left" MinHeight="36" Padding="4" Tag="es" Click="QuickButton_Click" />
                         </local:LeftWrapPanel>
                     </StackPanel>
+                    <Expander HorizontalAlignment="Stretch" Margin="0,0,0,8">
+                        <Expander.Header>
+                            <TextBlock x:Name="AdvancedGroupHeader" FontWeight="SemiBold" Text="Advanced" />
+                        </Expander.Header>
+                        <StackPanel>
+                            <ToggleSwitch x:Name="ShowTranscriptionBox" Header="Show transcription" />
+                            <ToggleSwitch x:Name="TranslateMySpeechBox" Header="Translate my speech" />
+                            <ToggleSwitch x:Name="TranslateIncomingBox" Header="Translate incoming speech" />
+                            <ToggleSwitch x:Name="TranscriptionOnlyBox" Header="Transcription only (no translation)" />
+                            <ToggleSwitch x:Name="DesktopOverlayBox" Header="Desktop overlay" />
+                            <ToggleSwitch x:Name="ShowOriginalBox" Header="Show original text" />
+                            <ToggleSwitch x:Name="ShowOwnMicBox" Header="Show own mic in feed" />
+                        </StackPanel>
+                    </Expander>
                 </StackPanel>
             </ScrollViewer>
             <ScrollViewer x:Name="SettingsScroll" Grid.Row="1" HorizontalAlignment="Stretch"
@@ -193,10 +207,6 @@
                                         Margin="4,0,0,0" Click="MicRefreshButton_Click" />
                             </Grid>
                         </Grid>
-                        <CheckBox x:Name="ShowTranscriptionBox" Content="Show transcription" />
-                        <CheckBox x:Name="TranslateMySpeechBox" Content="Translate my speech" />
-                        <CheckBox x:Name="TranslateIncomingBox" Content="Translate incoming speech" />
-                        <CheckBox x:Name="TranscriptionOnlyBox" Content="Transcription only (no translation)" />
                     </StackPanel>
                 </Expander>
                 <Expander HorizontalAlignment="Stretch" Margin="0,0,0,8">
@@ -216,9 +226,6 @@
                         <TextBlock x:Name="OverlayGroupHeader" FontWeight="SemiBold" Text="Overlay" />
                     </Expander.Header>
                     <StackPanel>
-                        <CheckBox x:Name="DesktopOverlayBox" Content="Desktop overlay" />
-                        <CheckBox x:Name="ShowOriginalBox" Content="Show original text" />
-                        <CheckBox x:Name="ShowOwnMicBox" Content="Show own mic in feed" />
                         <Grid Margin="0,6,0,6">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="100" />

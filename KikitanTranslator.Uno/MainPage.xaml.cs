@@ -400,6 +400,7 @@ public sealed partial class MainPage : Page
         VrChatGroupHeader.Text = T("VRChat");
         ApiKeysGroupHeader.Text = T("API keys");
         OverlayGroupHeader.Text = T("Overlay");
+        AdvancedGroupHeader.Text = T("Advanced");
 
         StartStopButton.Content = _engine.IsRunning ? T("Stop") : T("Start");
         ClearFeedButton.Content = T("Clear feed");
@@ -433,17 +434,17 @@ public sealed partial class MainPage : Page
         PosZLabel.Text = T("Pos Z (m):");
 
         SendToChatboxBox.Content = T("Send to chatbox");
-        ShowTranscriptionBox.Content = T("Show transcription");
-        TranslateMySpeechBox.Content = T("Translate my speech");
-        TranslateIncomingBox.Content = T("Translate incoming speech");
-        TranscriptionOnlyBox.Content = T("Transcription only (no translation)");
+        ShowTranscriptionBox.Header = T("Show transcription");
+        TranslateMySpeechBox.Header = T("Translate my speech");
+        TranslateIncomingBox.Header = T("Translate incoming speech");
+        TranscriptionOnlyBox.Header = T("Transcription only (no translation)");
         TranslationOnlyBox.Content = T("Translation only (no original)");
         SendWithoutWaitingBox.Content = T("Send without waiting for finish");
         DisableWhenMutedBox.Content = T("Disable when muted");
         SendUserDataBox.Content = T("Send user data (OSC)");
-        DesktopOverlayBox.Content = T("Desktop overlay");
-        ShowOriginalBox.Content = T("Show original text");
-        ShowOwnMicBox.Content = T("Show own mic in feed");
+        DesktopOverlayBox.Header = T("Desktop overlay");
+        ShowOriginalBox.Header = T("Show original text");
+        ShowOwnMicBox.Header = T("Show own mic in feed");
 
         // Anchor options carry translated strings, so rebuild them here;
         // the selection is restored (LoadFromConfig on startup, here on
@@ -518,16 +519,10 @@ public sealed partial class MainPage : Page
         WireCheck(ShowOwnMicBox, v => _cfg.FeedShowOwn = v);
         // FORK: toggling transcription re-renders the feed, so existing
         // entries gain/lose their transcription line too.
-        ShowTranscriptionBox.Checked += (_, _) =>
+        ShowTranscriptionBox.Toggled += (_, _) =>
         {
             if (_loading) return;
-            _cfg.FeedShowTranscription = true;
-            RepopulateFeed();
-        };
-        ShowTranscriptionBox.Unchecked += (_, _) =>
-        {
-            if (_loading) return;
-            _cfg.FeedShowTranscription = false;
+            _cfg.FeedShowTranscription = ShowTranscriptionBox.IsOn;
             RepopulateFeed();
         };
 
@@ -564,6 +559,12 @@ public sealed partial class MainPage : Page
         box.Unchecked += (_, _) => { if (!_loading) set(false); };
     }
 
+    // FORK: ToggleSwitch version, for the Advanced toggles in Main.
+    private void WireCheck(ToggleSwitch sw, Action<bool> set)
+    {
+        sw.Toggled += (_, _) => { if (!_loading) set(sw.IsOn); };
+    }
+
     private void WireNum(NumberBox box, Action<int> set)
     {
         box.ValueChanged += (_, args) => { if (!_loading) set((int)Math.Round(args.NewValue)); };
@@ -592,17 +593,17 @@ public sealed partial class MainPage : Page
             AnchorCombo.SelectedIndex = Math.Clamp(_cfg.OverlayAnchor, 0, 2);
 
             SendToChatboxBox.IsChecked = _cfg.SendToChatbox;
-            ShowTranscriptionBox.IsChecked = _cfg.FeedShowTranscription;
-            TranslateMySpeechBox.IsChecked = _cfg.MicTranslation;
-            TranslateIncomingBox.IsChecked = _cfg.DesktopTranslation;
-            TranscriptionOnlyBox.IsChecked = _cfg.SpeechToTextOnly;
+            ShowTranscriptionBox.IsOn = _cfg.FeedShowTranscription;
+            TranslateMySpeechBox.IsOn = _cfg.MicTranslation;
+            TranslateIncomingBox.IsOn = _cfg.DesktopTranslation;
+            TranscriptionOnlyBox.IsOn = _cfg.SpeechToTextOnly;
             TranslationOnlyBox.IsChecked = _cfg.TranslationOnly;
             SendWithoutWaitingBox.IsChecked = _cfg.SendWithoutWaitingForFinish;
             DisableWhenMutedBox.IsChecked = _cfg.DisableWhenMuted;
             SendUserDataBox.IsChecked = _cfg.SendUserData;
-            DesktopOverlayBox.IsChecked = _cfg.DesktopOverlayEnabled;
-            ShowOriginalBox.IsChecked = _cfg.OverlayShowOriginal;
-            ShowOwnMicBox.IsChecked = _cfg.FeedShowOwn;
+            DesktopOverlayBox.IsOn = _cfg.DesktopOverlayEnabled;
+            ShowOriginalBox.IsOn = _cfg.OverlayShowOriginal;
+            ShowOwnMicBox.IsOn = _cfg.FeedShowOwn;
 
             LogSizeBox.Value = Math.Clamp(_cfg.LogFontSize, 8, 24);
             UiScaleBox.Value = Math.Clamp(_cfg.UiScale, 80, 250);

@@ -44,7 +44,12 @@ the `KikitanTranslator.WinForms` project is deleted.
   API keys, Display — all start collapsed), switched by two toggle
   buttons pinned at the top of the left column. Control holds Start/Stop
   and Send text; Languages holds the From dropdown, the To dropdown, and
-  the target-language quick buttons under it. Start/Stop and Restart to
+  the target-language quick buttons under it. Main also holds an Advanced
+  expander (starts collapsed) with the translate/transcription and overlay
+  options as ToggleSwitches — show transcription, translate my/incoming
+  speech, transcription only, desktop overlay, show original text, show own
+  mic in feed — moved out of the Settings Voice/Overlay sections so they
+  aren't buried. The VRChat checkboxes stay checkboxes in Settings. Start/Stop and Restart to
   update use the system accent button style so the two actions users must
   notice stand out. Voice holds speech: From/
   recognizer/translator/mic (the To dropdown lives only in Languages,
