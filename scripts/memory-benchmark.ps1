@@ -3,6 +3,12 @@ param(
     [ValidateSet("Idle", "Running")]
     [string]$State = "Idle",
     [string]$BenchmarkRoot = (Join-Path $PSScriptRoot "memory-test-hosts"),
+    [ValidateSet("", "WinForms", "Uno Skia", "Uno WinAppSDK")]
+    [string]$HostName = "",
+    [ValidateRange(0, 2147483647)]
+    [int]$ExistingProcessId = 0,
+    [ValidateRange(0, 10)]
+    [int]$RoundNumber = 0,
     [ValidateRange(1, 10)]
     [int]$Rounds = 3,
     [ValidateRange(3, 300)]
@@ -32,6 +38,19 @@ $hosts = @(
     }
 )
 
+if ($ExistingProcessId -gt 0) {
+    if ([string]::IsNullOrWhiteSpace($HostName)) {
+        throw "Specify -HostName when sampling an existing process."
+    }
+    $hosts = @($hosts | Where-Object { $_.Name -eq $HostName })
+    if ($hosts.Count -ne 1) {
+        throw "Unknown benchmark host: $HostName"
+    }
+}
+elseif (-not [string]::IsNullOrWhiteSpace($HostName)) {
+    throw "-HostName requires -ExistingProcessId."
+}
+
 foreach ($targetHost in $hosts) {
     if (-not (Test-Path -LiteralPath $targetHost.Executable -PathType Leaf)) {
         throw "Missing $($targetHost.Name) executable: $($targetHost.Executable)"
@@ -43,8 +62,14 @@ foreach ($targetHost in $hosts) {
 }
 
 $existingHosts = @(Get-Process -Name "KikiVRCTan", "KikitanTranslator" -ErrorAction SilentlyContinue)
-if ($existingHosts.Count -gt 0) {
-    $runningNames = ($existingHosts | ForEach-Object { "$($_.ProcessName) (PID $($_.Id))" }) -join ", "
+$otherHosts = if ($ExistingProcessId -gt 0) {
+    @($existingHosts | Where-Object { $_.Id -ne $ExistingProcessId })
+}
+else {
+    $existingHosts
+}
+if ($otherHosts.Count -gt 0) {
+    $runningNames = ($otherHosts | ForEach-Object { "$($_.ProcessName) (PID $($_.Id))" }) -join ", "
     throw "Close existing KikiVRCTan/WinForms host processes before testing: $runningNames"
 }
 
@@ -81,10 +106,26 @@ function Get-Median([double[]]$Values) {
 $results = [System.Collections.Generic.List[object]]::new()
 $csvPath = Join-Path $BenchmarkRoot "memory-benchmark-$State.csv"
 $summaryPath = Join-Path $BenchmarkRoot "memory-benchmark-$State-summary.csv"
+$priorResults = @()
+if ($ExistingProcessId -gt 0 -and (Test-Path -LiteralPath $csvPath -PathType Leaf)) {
+    $priorResults = @(Import-Csv -LiteralPath $csvPath)
+}
+if ($ExistingProcessId -gt 0 -and $RoundNumber -eq 0) {
+    $RoundNumber = 1
+    if ($priorResults.Count -gt 0) {
+        $previousRound = ($priorResults | ForEach-Object { [int]$_.Round } | Measure-Object -Maximum).Maximum
+        $RoundNumber = [int]$previousRound + 1
+    }
+}
 
 for ($round = 1; $round -le $Rounds; $round++) {
-    $orderedHosts = for ($offset = 0; $offset -lt $hosts.Count; $offset++) {
-        $hosts[($round - 1 + $offset) % $hosts.Count]
+    if ($ExistingProcessId -gt 0) {
+        $orderedHosts = $hosts
+    }
+    else {
+        $orderedHosts = for ($offset = 0; $offset -lt $hosts.Count; $offset++) {
+            $hosts[($round - 1 + $offset) % $hosts.Count]
+        }
     }
 
     foreach ($targetHost in $orderedHosts) {
@@ -95,25 +136,39 @@ for ($round = 1; $round -le $Rounds; $round++) {
             Write-Host "Round $round/$Rounds - $($targetHost.Name): launching idle. Do not press Start."
         }
 
-        $process = Start-Process -FilePath $targetHost.Executable `
-            -WorkingDirectory (Split-Path -Parent $targetHost.Executable) -PassThru
-        $processId = $process.Id
+        if ($ExistingProcessId -gt 0) {
+            $process = Get-Process -Id $ExistingProcessId -ErrorAction Stop
+            $expectedProcessName = [System.IO.Path]::GetFileNameWithoutExtension($targetHost.Executable)
+            if ($process.ProcessName -ne $expectedProcessName) {
+                throw "PID $ExistingProcessId is $($process.ProcessName), not $expectedProcessName."
+            }
+            $processId = $ExistingProcessId
+            $sampleRound = $RoundNumber + $round - 1
+        }
+        else {
+            $process = Start-Process -FilePath $targetHost.Executable `
+                -WorkingDirectory (Split-Path -Parent $targetHost.Executable) -PassThru
+            $processId = $process.Id
+            $sampleRound = $round
+        }
 
         try {
-            $windowDeadline = (Get-Date).AddSeconds(90)
-            do {
-                $process.Refresh()
-                if ($process.HasExited) {
-                    throw "$($targetHost.Name) exited before its window was ready."
-                }
-                if ($process.MainWindowHandle -ne [IntPtr]::Zero) {
-                    break
-                }
-                Start-Sleep -Seconds 1
-            } while ((Get-Date) -lt $windowDeadline)
+            if ($ExistingProcessId -eq 0) {
+                $windowDeadline = (Get-Date).AddSeconds(90)
+                do {
+                    $process.Refresh()
+                    if ($process.HasExited) {
+                        throw "$($targetHost.Name) exited before its window was ready."
+                    }
+                    if ($process.MainWindowHandle -ne [IntPtr]::Zero) {
+                        break
+                    }
+                    Start-Sleep -Seconds 1
+                } while ((Get-Date) -lt $windowDeadline)
 
-            if ($process.MainWindowHandle -eq [IntPtr]::Zero) {
-                throw "$($targetHost.Name) did not create a main window within 90 seconds."
+                if ($process.MainWindowHandle -eq [IntPtr]::Zero) {
+                    throw "$($targetHost.Name) did not create a main window within 90 seconds."
+                }
             }
 
             if ($running) {
@@ -133,7 +188,7 @@ for ($round = 1; $round -le $Rounds; $round++) {
                 $results.Add([pscustomobject]@{
                     State = $State
                     Host = $targetHost.Name
-                    Round = $round
+                    Round = $sampleRound
                     Sample = $sample
                     Time = (Get-Date).ToString("o")
                     ProcessId = $processId
@@ -144,31 +199,37 @@ for ($round = 1; $round -le $Rounds; $round++) {
                 Start-Sleep -Seconds $IntervalSeconds
             }
 
-            $results | Export-Csv -LiteralPath $csvPath -NoTypeInformation -Encoding UTF8 -Force
+            $currentResults = $results.ToArray()
+            $allResults = @($priorResults) + @($currentResults)
+            $allResults | Export-Csv -LiteralPath $csvPath -NoTypeInformation -Encoding UTF8 -Force
         }
         finally {
-            $process.Refresh()
-            if (-not $process.HasExited) {
-                $null = $process.CloseMainWindow()
-                if (-not $process.WaitForExit(10000)) {
-                    Stop-Process -Id $processId -Force
+            if ($ExistingProcessId -eq 0) {
+                $process.Refresh()
+                if (-not $process.HasExited) {
+                    $null = $process.CloseMainWindow()
+                    if (-not $process.WaitForExit(10000)) {
+                        Stop-Process -Id $processId -Force
+                    }
                 }
             }
         }
     }
 }
 
-$results | Export-Csv -LiteralPath $csvPath -NoTypeInformation -Encoding UTF8 -Force
+$currentResults = $results.ToArray()
+$allResults = @($priorResults) + @($currentResults)
+$allResults | Export-Csv -LiteralPath $csvPath -NoTypeInformation -Encoding UTF8 -Force
 
-$summary = foreach ($group in ($results | Group-Object Host)) {
+$summary = foreach ($group in ($allResults | Group-Object Host)) {
     $set = @($group.Group)
     [pscustomobject]@{
         State = $State
         Host = $group.Name
         Samples = $set.Count
-        MedianWorkingSetMiB = [math]::Round((Get-Median -Values @($set | ForEach-Object { $_.WorkingSetMiB })), 1)
-        MedianPrivateWorkingSetMiB = [math]::Round((Get-Median -Values @($set | ForEach-Object { $_.PrivateWorkingSetMiB })), 1)
-        MedianPrivateBytesMiB = [math]::Round((Get-Median -Values @($set | ForEach-Object { $_.PrivateBytesMiB })), 1)
+        MedianWorkingSetMiB = [math]::Round((Get-Median -Values @($set | ForEach-Object { [double]$_.WorkingSetMiB })), 1)
+        MedianPrivateWorkingSetMiB = [math]::Round((Get-Median -Values @($set | ForEach-Object { [double]$_.PrivateWorkingSetMiB })), 1)
+        MedianPrivateBytesMiB = [math]::Round((Get-Median -Values @($set | ForEach-Object { [double]$_.PrivateBytesMiB })), 1)
     }
 }
 
