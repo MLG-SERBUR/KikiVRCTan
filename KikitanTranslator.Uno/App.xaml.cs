@@ -50,11 +50,14 @@ public partial class App : Application
         // FORK: title bar shows the short build SHA, like the WinForms host.
         var version = Updater.LocalVersion();
         MainWindow.Title = version.Length >= 7 ? $"KikiVRCTan ({version[..7]})" : "KikiVRCTan";
-        // FORK: initial size, like the WinForms host (980x720). Best-effort:
-        // AppWindow support on the Skia Win32 host is unverified, so never
-        // let this throw.
+        // FORK: initial size, like the WinForms host (980x720).
+#if UNO_SKIA_DESKTOP
+        // AppWindow support on the Skia Win32 host is unverified, so never let this throw.
         try { MainWindow.AppWindow?.Resize(new Windows.Graphics.SizeInt32(980, 720)); }
         catch { }
+#else
+        MainWindow.AppWindow?.Resize(new Windows.Graphics.SizeInt32(980, 720));
+#endif
         // Ensure the current window is active
         MainWindow.Activate();
     }

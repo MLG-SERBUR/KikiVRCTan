@@ -1,6 +1,6 @@
 <Project Sdk="Uno.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net10.0-desktop</TargetFrameworks>
+    <TargetFrameworks>net10.0-desktop;net10.0-windows10.0.19041</TargetFrameworks>
 
     <!-- FORK (feed-overlay): Uno Platform 7 Skia Desktop host, replacing the
          WinForms host. Exe name is KikiVRCTan.exe (renamed from
@@ -29,7 +29,7 @@
       UnoFeatures are used to quickly add and manage features enabled for your app.
       https://aka.platform.uno/singleproject-features
     -->
-    <UnoFeatures>
+    <UnoFeatures Condition="'$(TargetFramework)' == 'net10.0-desktop'">
       Skia;
     </UnoFeatures>
 
@@ -37,7 +37,16 @@
          pack for net10.0-desktop, which fails restore with NU1102; the
          CoreCLR runtime is what this app wants. -->
     <UseMonoRuntime Condition="'$(TargetFramework)' == 'net10.0-desktop'">false</UseMonoRuntime>
+    <DefineConstants Condition="'$(TargetFramework)' == 'net10.0-desktop'">$(DefineConstants);UNO_SKIA_DESKTOP</DefineConstants>
   </PropertyGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net10.0-desktop'">
+    <Compile Remove="Platforms\Windows\Program.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net10.0-windows10.0.19041'">
+    <Compile Remove="Platforms\Desktop\Program.cs" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />

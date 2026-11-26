@@ -1,0 +1,66 @@
+name: Build memory benchmark hosts (test only)
+
+on:
+  push:
+    branches: [memory-test]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout benchmark branch
+        uses: actions/checkout@v4
+
+      - name: Checkout historical WinForms host
+        uses: actions/checkout@v4
+        with:
+          ref: 3451b3713774f545ef337003072b0af7d0932438
+          path: winforms-source
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Setup .NET 9
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Build benchmark hosts
+        env:
+          DOTNET_CLI_TELEMETRY_OPTOUT: 1
+        run: |
+          New-Item -ItemType Directory -Force benchmark-artifacts | Out-Null
+
+          dotnet publish KikitanTranslator.Uno\KikitanTranslator.Uno.csproj -f net10.0-desktop -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o benchmark-artifacts\uno-skia
+          if ($LASTEXITCODE -ne 0) { throw "Uno Skia publish failed" }
+
+          dotnet build KikitanTranslator.Uno\KikitanTranslator.Uno.csproj -f net10.0-windows10.0.19041 -c Release
+          if ($LASTEXITCODE -ne 0) { throw "Uno WinAppSDK build failed" }
+          New-Item -ItemType Directory -Force benchmark-artifacts\uno-winappsdk | Out-Null
+          Copy-Item KikitanTranslator.Uno\bin\Release\net10.0-windows10.0.19041\* benchmark-artifacts\uno-winappsdk -Recurse -Force
+
+          dotnet publish winforms-source\KikitanTranslator.WinForms\KikitanTranslator.WinForms.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o benchmark-artifacts\winforms
+          if ($LASTEXITCODE -ne 0) { throw "Historical WinForms publish failed" }
+
+          Remove-Item benchmark-artifacts\uno-skia\overlay -Recurse -Force -ErrorAction SilentlyContinue
+          Remove-Item benchmark-artifacts\uno-winappsdk\overlay -Recurse -Force -ErrorAction SilentlyContinue
+          Remove-Item benchmark-artifacts\winforms\overlay -Recurse -Force -ErrorAction SilentlyContinue
+          Remove-Item benchmark-artifacts\uno-skia\KikitanTranslator.Overlay.exe -Force -ErrorAction SilentlyContinue
+          Remove-Item benchmark-artifacts\uno-winappsdk\KikitanTranslator.Overlay.exe -Force -ErrorAction SilentlyContinue
+          Remove-Item benchmark-artifacts\winforms\KikitanTranslator.Overlay.exe -Force -ErrorAction SilentlyContinue
+
+          Compress-Archive -Path benchmark-artifacts\* -DestinationPath memory-test-hosts.zip -Force
+
+      - name: Upload benchmark hosts
+        uses: actions/upload-artifact@v4
+        with:
+          name: memory-test-hosts
+          path: memory-test-hosts.zip
+          retention-days: 7
+          if-no-files-found: error
