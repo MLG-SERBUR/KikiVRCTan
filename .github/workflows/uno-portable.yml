@@ -80,6 +80,13 @@ jobs:
           dotnet publish KikitanTranslator.Overlay/KikitanTranslator.Overlay.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o KikitanTranslator.Uno/publish/app/overlay
           if ($LASTEXITCODE -ne 0) { throw "Overlay publish failed" }
           $env:GITHUB_SHA | Out-File -FilePath KikitanTranslator.Uno/publish/app/version.txt -NoNewline
+          # FORK: manifest of shipped files, so the updater can delete files a
+          # release stops shipping (stale files otherwise linger forever).
+          # Relative paths, forward slashes, sorted for a stable diff.
+          Get-ChildItem KikitanTranslator.Uno\publish\app -Recurse -File -Name |
+            ForEach-Object { $_ -replace '\\','/' } |
+            Sort-Object |
+            Set-Content KikitanTranslator.Uno\publish\app\manifest.txt
 
       - name: Create portable zip
         run: |

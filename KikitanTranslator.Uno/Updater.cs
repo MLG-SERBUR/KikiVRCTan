@@ -60,6 +60,7 @@ public sealed class Updater
         var stageDir = Path.Combine(Path.GetTempPath(), "KikiVRCTan-update");
         if (Directory.Exists(stageDir)) Directory.Delete(stageDir, true);
         ZipFile.ExtractToDirectory(_downloadedZip, stageDir);
+        DeleteStaleFiles(appDir, stageDir);
 
         var bat = Path.Combine(Path.GetTempPath(), "KikiVRCTan-apply-update.bat");
         File.WriteAllText(bat,
@@ -76,6 +77,59 @@ public sealed class Updater
 
         Process.Start(new ProcessStartInfo(bat) { UseShellExecute = true, CreateNoWindow = true });
         Environment.Exit(0);
+    }
+
+    // FORK: manifest cleanup — delete files the previous release shipped
+    // but this one doesn't (stale files otherwise linger forever, e.g. the
+    // overlay exe at the root after it moved to overlay/). Only paths listed
+    // in the old manifest are ever deleted, so user files in the folder are
+    // never touched. Skipped when either manifest is missing (installs that
+    // predate manifests get no cleanup — only the one-time item below).
+    private static void DeleteStaleFiles(string appDir, string stageDir)
+    {
+        var oldManifest = Path.Combine(appDir, "manifest.txt");
+        var newManifest = Path.Combine(stageDir, "manifest.txt");
+        if (File.Exists(oldManifest) && File.Exists(newManifest))
+        {
+            var fresh = new HashSet<string>(
+                File.ReadAllLines(newManifest), StringComparer.OrdinalIgnoreCase);
+            foreach (var entry in File.ReadAllLines(oldManifest))
+            {
+                var rel = entry.Trim().Replace('\\', '/');
+                if (rel.Length == 0 || rel == "manifest.txt" || rel == "config.json"
+                    || fresh.Contains(rel))
+                    continue;
+
+                var full = Path.GetFullPath(Path.Combine(
+                    appDir, rel.Replace('/', Path.DirectorySeparatorChar)));
+                if (!full.StartsWith(appDir + Path.DirectorySeparatorChar,
+                        StringComparison.OrdinalIgnoreCase))
+                    continue; // entry escapes the app folder; never delete it
+
+                try
+                {
+                    if (File.Exists(full)) File.Delete(full);
+                }
+                catch (Exception e)
+                {
+                    Log.Debug(e, "[FORK] Could not delete stale shipped file {File}", rel);
+                }
+            }
+        }
+
+        // FORK: one-time cleanup for the pre-manifest layout — the overlay
+        // used to ship beside the exe; installs updated before manifests
+        // existed still carry the stale root copy.
+        var staleRootOverlay = Path.Combine(appDir, "KikitanTranslator.Overlay.exe");
+        var newOverlay = Path.Combine(stageDir, "overlay", "KikitanTranslator.Overlay.exe");
+        if (File.Exists(newOverlay) && File.Exists(staleRootOverlay))
+        {
+            try { File.Delete(staleRootOverlay); }
+            catch (Exception e)
+            {
+                Log.Debug(e, "[FORK] Could not delete stale root overlay exe");
+            }
+        }
     }
 
     // FORK: local version (full SHA from version.txt, or "unknown").

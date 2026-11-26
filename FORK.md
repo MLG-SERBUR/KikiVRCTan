@@ -155,7 +155,11 @@ survive.
 A simple self-updater (`Updater.cs`) checks `version.txt` on the release at
 startup; on mismatch it downloads the zip in the background and shows a
 "Restart to update" button, which applies the update via a batch script
-(preserving `config.json`) and restarts the app.
+(preserving `config.json`) and restarts the app. The zip also ships a
+`manifest.txt` listing every shipped file; on update the app deletes files
+the old manifest lists but the new one doesn't, so files a release stops
+shipping don't linger. Only ever-listed shipped files are deleted — user
+files in the folder are never touched.
 
 ## Tests
 
