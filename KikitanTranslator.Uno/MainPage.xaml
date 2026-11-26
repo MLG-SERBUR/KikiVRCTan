@@ -69,6 +69,7 @@
                     <StackPanel HorizontalAlignment="Stretch" Spacing="6">
                         <local:LeftWrapPanel HorizontalAlignment="Stretch" ItemSpacing="6" LineSpacing="6">
                             <Button x:Name="StartStopButton" Content="Start" ContentTemplate="{StaticResource ButtonTextTemplate}"
+                                    Style="{StaticResource AccentButtonStyle}"
                                     HorizontalAlignment="Left" MinHeight="36" Padding="8,4" Click="StartStopButton_Click" />
                             <Button x:Name="LangButton" MinHeight="36" Padding="8,4" Click="LangButton_Click"
                                     HorizontalAlignment="Left">
@@ -85,6 +86,7 @@
                         <TextBlock x:Name="StatusText" Text="Stopped" Margin="0,6,0,0" />
                         <TextBlock x:Name="MutedText" Foreground="{ThemeResource SystemFillColorCriticalBrush}" Margin="0,2,0,0" />
                         <Button x:Name="UpdateButton" Content="Restart to update" ContentTemplate="{StaticResource ButtonTextTemplate}"
+                                Style="{StaticResource AccentButtonStyle}"
                                 HorizontalAlignment="Stretch" MinHeight="36" Padding="8,4" Margin="0,6,0,0"
                                 Visibility="Collapsed" Click="UpdateButton_Click" />
                     </StackPanel>

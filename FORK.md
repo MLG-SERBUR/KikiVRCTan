@@ -44,7 +44,9 @@ the `KikitanTranslator.WinForms` project is deleted.
   API keys, Display — all start collapsed), switched by two toggle
   buttons pinned at the top of the left column. Control holds Start/Stop
   and Send text; Languages holds the From dropdown, the To dropdown, and
-  the target-language quick buttons under it. Voice holds speech: From/
+  the target-language quick buttons under it. Start/Stop and Restart to
+  update use the system accent button style so the two actions users must
+  notice stand out. Voice holds speech: From/
   recognizer/translator/mic (the To dropdown lives only in Languages,
   not duplicated here). The quick
   buttons switch the target language in one tap — Korean, Japanese,
