@@ -59,24 +59,41 @@ jobs:
         with:
           dotnet-version: '9.0.x'
 
-      # FORK: -f selects the Uno head's TFM for the top project only. Do NOT
-      # pass -p:TargetFrameworks=net10.0-desktop: it flows into the net9.0
-      # Base/Resources references as a global property and fails restore
-      # with NETSDK1139 (that bad flag shipped the overlay-only zip once).
-      # Each publish is checked explicitly: pwsh does not fail the step on
-      # a native command's non-zero exit, so an unchecked failure would
-      # silently ship a partial zip (the overlay publish alone succeeds).
-      - name: Publish app (self-contained, single-file)
+      # FORK: the Skia head is no longer shipped (WinAppSDK is, issue #1),
+      # but it still builds so the fallback does not rot. Delete this step
+      # with the net10.0-desktop target once the WinAppSDK release has
+      # proven itself on real PCs.
+      - name: Build Skia head (fallback, not shipped)
         env:
           DOTNET_CLI_TELEMETRY_OPTOUT: 1
         run: |
-          dotnet publish KikitanTranslator.Uno/KikitanTranslator.Uno.csproj -f net10.0-desktop -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o KikitanTranslator.Uno/publish/app
+          dotnet build KikitanTranslator.Uno/KikitanTranslator.Uno.csproj -f net10.0-desktop -c Release
+          if ($LASTEXITCODE -ne 0) { throw "Skia build failed" }
+
+      # FORK: -f selects the Uno head's TFM for the top project only. Do NOT
+      # pass -p:TargetFrameworks=net10.0-windows10.0.19041: it flows into the
+      # net9.0 Base/Resources references as a global property and fails
+      # restore with NETSDK1139 (that bad flag shipped the overlay-only zip once).
+      # Each publish is checked explicitly: pwsh does not fail the step on
+      # a native command's non-zero exit, so an unchecked failure would
+      # silently ship a partial zip (the overlay publish alone succeeds).
+      # FORK: the shipped head is WinAppSDK (native WinUI 3), not Skia:
+      # 67.4 vs 206.6 MiB private working set idle (issue #1). Self-contained
+      # WinAppSDK deployment (WindowsAppSDKSelfContained) ships the Windows
+      # App Runtime DLLs in the folder, so users install nothing. No
+      # single-file: WinAppSDK does not support it.
+      - name: Publish app (WinAppSDK, self-contained)
+        env:
+          DOTNET_CLI_TELEMETRY_OPTOUT: 1
+        run: |
+          dotnet publish KikitanTranslator.Uno/KikitanTranslator.Uno.csproj -f net10.0-windows10.0.19041 -c Release -r win-x64 --self-contained true -p:WindowsAppSDKSelfContained=true -o KikitanTranslator.Uno/publish/app
           if ($LASTEXITCODE -ne 0) { throw "Uno publish failed" }
           # FORK: the overlay publishes into its own subfolder, NOT beside the
-          # host exe. The host ships a loose libSkiaSharp.dll (its SkiaSharp
-          # 4.156.0); the overlay uses SkiaSharp 3.119.2, and a shared folder
-          # makes it load the host's native 156.0, which fails SkiaSharp's
-          # native-version check and kills the overlay at startup (2026-11-26).
+          # host exe. The overlay uses SkiaSharp 3.119.2; a shared folder once
+          # made it load the Skia host's native libSkiaSharp 156.0, which fails
+          # SkiaSharp's native-version check and kills the overlay at startup
+          # (2026-11-26). The isolation stays: the overlay's natives must never
+          # collide with anything the host ships.
           dotnet publish KikitanTranslator.Overlay/KikitanTranslator.Overlay.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o KikitanTranslator.Uno/publish/app/overlay
           if ($LASTEXITCODE -ne 0) { throw "Overlay publish failed" }
           $env:GITHUB_SHA | Out-File -FilePath KikitanTranslator.Uno/publish/app/version.txt -NoNewline

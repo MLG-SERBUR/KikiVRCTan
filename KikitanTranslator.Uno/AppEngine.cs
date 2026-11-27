@@ -39,6 +39,7 @@ public sealed class AppEngine : IDisposable
     private bool _isMuted;
     private bool _disposed;
     private System.Threading.Timer? _restartDebounce;
+    private System.Threading.Timer? _memoryTimer;
 
     public bool IsRunning => _running;
     public bool IsMuted => _isMuted;
@@ -52,6 +53,10 @@ public sealed class AppEngine : IDisposable
 
     public void Initialize()
     {
+        LogMemorySnapshot();
+        _memoryTimer = new System.Threading.Timer(_ => LogMemorySnapshot(),
+            null, TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(1));
+
         var silero = Path.Combine(AppContext.BaseDirectory, "silero_vad.onnx");
         var errorHandler = new WinErrorHandler(msg => StatusChanged?.Invoke(msg));
 
@@ -371,10 +376,26 @@ public sealed class AppEngine : IDisposable
     public void Dispose()
     {
         _disposed = true;
+        _memoryTimer?.Dispose();
+        _memoryTimer = null;
         Stop();
         _restartDebounce?.Dispose();
         _feedWriter?.Dispose();
         _oscWatcher?.Dispose();
+    }
+
+    private static void LogMemorySnapshot()
+    {
+        using var process = Process.GetCurrentProcess();
+        process.Refresh();
+        var gcBytes = GC.GetTotalMemory(false);
+        var workingSetBytes = process.WorkingSet64;
+        var privateBytes = process.PrivateMemorySize64;
+        Log.Information(
+            "[MEMORY] GC.GetTotalMemory(false)={GcBytes} bytes ({GcMiB:F1} MiB); Process.WorkingSet64={WorkingSetBytes} bytes ({WorkingSetMiB:F1} MiB); Process.PrivateMemorySize64={PrivateBytes} bytes ({PrivateMiB:F1} MiB)",
+            gcBytes, gcBytes / 1048576d,
+            workingSetBytes, workingSetBytes / 1048576d,
+            privateBytes, privateBytes / 1048576d);
     }
 
     private sealed class WinErrorHandler(Action<string> onError) : IErrorHandler
