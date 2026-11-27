@@ -1,9 +1,12 @@
 <Project Sdk="Uno.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net10.0-desktop;net10.0-windows10.0.19041</TargetFrameworks>
+    <TargetFramework>net10.0-windows10.0.19041</TargetFramework>
 
-    <!-- FORK (feed-overlay): Uno Platform 7 Skia Desktop host, replacing the
-         WinForms host. Exe name is KikiVRCTan.exe (renamed from
+    <!-- FORK (feed-overlay): Uno Platform 7 WinAppSDK (native WinUI 3) host,
+         replacing the WinForms host. The Skia Desktop head was deleted
+         outright (2026-11-26): the app is Windows-only (VRChat, OSC,
+         net9.0-windows backend), so there is no cross-platform head to
+         keep. Exe name is KikiVRCTan.exe (renamed from
          KikitanTranslator.exe; the updater restarts by that name). -->
     <OutputType>WinExe</OutputType>
     <AssemblyName>KikiVRCTan</AssemblyName>
@@ -25,29 +28,7 @@
     <!-- Package Description -->
     <Description>KikiVRCTan powered by Uno Platform.</Description>
 
-    <!--
-      UnoFeatures are used to quickly add and manage features enabled for your app.
-      https://aka.platform.uno/singleproject-features
-    -->
-    <UnoFeatures Condition="'$(TargetFramework)' == 'net10.0-desktop'">
-      Skia;
-    </UnoFeatures>
-
-    <!-- FORK (feed-overlay): Uno 7 on desktop defaults to the Mono runtime
-         pack for net10.0-desktop, which fails restore with NU1102; the
-         CoreCLR runtime is what this app wants. -->
-    <UseMonoRuntime Condition="'$(TargetFramework)' == 'net10.0-desktop'">false</UseMonoRuntime>
-    <DefineConstants Condition="'$(TargetFramework)' == 'net10.0-desktop'">$(DefineConstants);UNO_SKIA_DESKTOP</DefineConstants>
-    <DefineConstants Condition="'$(TargetFramework)' == 'net10.0-windows10.0.19041'">$(DefineConstants);UNO_WINAPPSDK</DefineConstants>
   </PropertyGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'net10.0-desktop'">
-    <Compile Remove="Platforms\Windows\WindowsStartup.cs" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'net10.0-windows10.0.19041'">
-    <Compile Remove="Platforms\Desktop\Program.cs" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
@@ -88,12 +69,12 @@
   <!-- FORK (feed-overlay): build the overlay and stage it next to this exe,
        since AppEngine launches KikitanTranslator.Overlay.exe from the app dir.
        The overlay targets net9.0-windows, so its output path is hardcoded
-       (this project's TFM is net10.0-desktop and would glob the wrong dir). -->
+       (this project's TFM is net10.0-windows10.0.19041 and would glob the wrong dir). -->
   <Target Name="BuildAndStageOverlay" AfterTargets="Build">
     <!-- Restore first: the overlay is built via a raw MSBuild task (not a
          ProjectReference), so a plain `dotnet build` on a fresh checkout
          would otherwise fail with NETSDK1004. TargetFramework(s) are
-         removed from the child build: this project is net10.0-desktop and
+         removed from the child build: this project is net10.0-windows10.0.19041 and
          the overlay is net9.0-windows — inheriting ours fails with NETSDK1139. -->
     <MSBuild Projects="..\KikitanTranslator.Overlay\KikitanTranslator.Overlay.csproj"
              Properties="Configuration=$(Configuration);EnableWindowsTargeting=true"

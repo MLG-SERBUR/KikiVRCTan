@@ -10,22 +10,19 @@ and a native Windows UI, without touching the speech/translation backend.
 webview/WebView2 (upstream's `KikitanTranslator.Photino` project is
 untouched and still builds). It replaced the WinForms host outright in
 the Uno migration (2026-11-24); the `KikitanTranslator.WinForms`
-project is deleted. Two heads in one project: the shipped one is
-WinAppSDK (`net10.0-windows10.0.19041`, native WinUI 3, self-contained
-deployment — the Windows App Runtime DLLs ship in the folder, so users
-install nothing), picked after the issue #1 benchmark (67.4 vs 206.6
-MiB private working set idle against the Skia head; managed heap only
-4.8 vs 18.5 MiB, so the gap is native, not GC). The Skia Desktop head
-(`net10.0-desktop`) still builds as a fallback but is not shipped; no
+project is deleted. One head: WinAppSDK (`net10.0-windows10.0.19041`,
+native WinUI 3, self-contained deployment — the Windows App Runtime
+DLLs ship in the folder, so users install nothing), picked after the
+issue #1 benchmark (67.4 vs 206.6 MiB private working set idle against
+the Skia head; managed heap only 4.8 vs 18.5 MiB, so the gap is native,
+not GC). The Skia Desktop head was deleted outright (2026-11-26): the
+app is Windows-only, so there is no cross-platform head to keep. No
 single-file for WinAppSDK (unsupported), so the zip holds loose files.
 `AppEngine` also logs a `[MEMORY]` line at startup and every 60s (GC
 heap, working set, private bytes) from the same benchmark work.
 
-- `Platforms/Desktop/Program.cs` — Skia entry point: Serilog `Logger.Initialize()`,
-  `AppConfig.Load()`, runs the Uno host with `MainPage`. Single-instance guard
-  (named mutex): a second copy refuses to start instead of double-sending OSC.
-- `Platforms/Windows/WindowsStartup.cs` — WinAppSDK entry: the same fork
-  setup (mutex, config dir, logging, first-run language, `AppEngine`
+- `Platforms/Windows/WindowsStartup.cs` — entry point: the fork setup
+  (mutex, config dir, logging, first-run language, `AppEngine`
   creation) run from the `App` constructor, since WinUI startup is
   generated. `MainWindow.Closed` disposes the engine.
 - `AppEngine.cs` — pipeline orchestration, mirrors upstream `Photino/Manager`

@@ -59,17 +59,6 @@ jobs:
         with:
           dotnet-version: '9.0.x'
 
-      # FORK: the Skia head is no longer shipped (WinAppSDK is, issue #1),
-      # but it still builds so the fallback does not rot. Delete this step
-      # with the net10.0-desktop target once the WinAppSDK release has
-      # proven itself on real PCs.
-      - name: Build Skia head (fallback, not shipped)
-        env:
-          DOTNET_CLI_TELEMETRY_OPTOUT: 1
-        run: |
-          dotnet build KikitanTranslator.Uno/KikitanTranslator.Uno.csproj -f net10.0-desktop -c Release
-          if ($LASTEXITCODE -ne 0) { throw "Skia build failed" }
-
       # FORK: -f selects the Uno head's TFM for the top project only. Do NOT
       # pass -p:TargetFrameworks=net10.0-windows10.0.19041: it flows into the
       # net9.0 Base/Resources references as a global property and fails

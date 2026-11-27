@@ -3,7 +3,7 @@ param(
     [ValidateSet("Idle", "Running")]
     [string]$State = "Idle",
     [string]$BenchmarkRoot = (Join-Path $PSScriptRoot "memory-test-hosts"),
-    [ValidateSet("", "WinForms", "Uno Skia", "Uno WinAppSDK")]
+    [ValidateSet("", "WinForms", "Uno WinAppSDK")]
     [string]$HostName = "",
     [ValidateRange(0, 2147483647)]
     [int]$ExistingProcessId = 0,
@@ -27,10 +27,6 @@ $hosts = @(
     [pscustomobject]@{
         Name = "WinForms"
         Executable = Join-Path $BenchmarkRoot "winforms\KikitanTranslator.exe"
-    },
-    [pscustomobject]@{
-        Name = "Uno Skia"
-        Executable = Join-Path $BenchmarkRoot "uno-skia\KikiVRCTan.exe"
     },
     [pscustomobject]@{
         Name = "Uno WinAppSDK"

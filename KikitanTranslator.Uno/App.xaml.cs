@@ -6,8 +6,8 @@ namespace KikitanTranslator.Uno;
 
 public partial class App : Application
 {
-    // FORK (feed-overlay): the pipeline, created in Program.Main before the
-    // host starts. MainPage reads it from here.
+    // FORK (feed-overlay): the pipeline, created in WindowsStartup.Initialize()
+    // from the App constructor before the host starts. MainPage reads it from here.
     public static AppEngine? Engine { get; set; }
 
     /// <summary>
@@ -16,9 +16,7 @@ public partial class App : Application
     /// </summary>
     public App()
     {
-#if UNO_WINAPPSDK
         WindowsStartup.Initialize();
-#endif
         this.InitializeComponent();
     }
 
@@ -27,9 +25,7 @@ public partial class App : Application
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
         MainWindow = new Window();
-#if UNO_WINAPPSDK
         MainWindow.Closed += (_, _) => Engine?.Dispose();
-#endif
 
         // Do not repeat app initialization when the Window already has content,
         // just ensure that the window is active
@@ -57,13 +53,7 @@ public partial class App : Application
         var version = Updater.LocalVersion();
         MainWindow.Title = version.Length >= 7 ? $"KikiVRCTan ({version[..7]})" : "KikiVRCTan";
         // FORK: initial size, like the WinForms host (980x720).
-#if UNO_SKIA_DESKTOP
-        // AppWindow support on the Skia Win32 host is unverified, so never let this throw.
-        try { MainWindow.AppWindow?.Resize(new Windows.Graphics.SizeInt32(980, 720)); }
-        catch { }
-#else
         MainWindow.AppWindow?.Resize(new Windows.Graphics.SizeInt32(980, 720));
-#endif
         // Ensure the current window is active
         MainWindow.Activate();
     }
