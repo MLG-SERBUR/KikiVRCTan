@@ -121,7 +121,7 @@ public sealed class Updater
         // used to ship beside the exe; installs updated before manifests
         // existed still carry the stale root copy.
         var staleRootOverlay = Path.Combine(appDir, "KikitanTranslator.Overlay.exe");
-        var newOverlay = Path.Combine(stageDir, "overlay", "KikitanTranslator.Overlay.exe");
+        var newOverlay = Path.Combine(stageDir, "overlay", "KikiVRCTan.Overlay.exe");
         if (File.Exists(newOverlay) && File.Exists(staleRootOverlay))
         {
             try { File.Delete(staleRootOverlay); }

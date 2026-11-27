@@ -67,7 +67,7 @@
   </ItemGroup>
 
   <!-- FORK (feed-overlay): build the overlay and stage it next to this exe,
-       since AppEngine launches KikitanTranslator.Overlay.exe from the app dir.
+       since AppEngine launches KikiVRCTan.Overlay.exe from the app dir.
        The overlay targets net9.0-windows, so its output path is hardcoded
        (this project's TFM is net10.0-windows10.0.19041 and would glob the wrong dir). -->
   <Target Name="BuildAndStageOverlay" AfterTargets="Build">

@@ -136,8 +136,8 @@ heap, working set, private bytes) from the same benchmark work.
   loop moved to a background thread so the desktop form runs alongside it.
 
 `sln` — Uno project added (WinForms project deleted). The Uno build also builds + stages
-`KikitanTranslator.Overlay.exe` in an `overlay/` subfolder next to the host exe — not
-in the same folder, because the host ships a loose `libSkiaSharp.dll` (SkiaSharp 4.156.0)
+`KikiVRCTan.Overlay.exe` in an `overlay/` subfolder next to the host exe — not
+in the same folder, because the Skia host shipped a loose `libSkiaSharp.dll` (SkiaSharp 4.156.0)
 while the overlay uses SkiaSharp 3.119.2; sharing the folder made the overlay load the
 host's native 156.0, fail SkiaSharp's native-version check, and die silently at startup
 (2026-11-26). The subfolder keeps each exe's natives separate, so either side's

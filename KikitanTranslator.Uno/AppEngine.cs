@@ -93,13 +93,11 @@ public sealed class AppEngine : IDisposable
     private void LaunchOverlay()
     {
         // FORK: the overlay lives in its own subfolder so its SkiaSharp
-        // 3.119.2 natives never collide with the host's loose libSkiaSharp.dll
-        // (SkiaSharp 4.156.0) — a shared folder made the overlay load the
-        // host's native 156.0 and die at startup on the version check.
-        var overlayExe = Path.Combine(AppContext.BaseDirectory, "overlay", "KikitanTranslator.Overlay.exe");
+        // 3.119.2 natives never collide with anything the host ships.
+        var overlayExe = Path.Combine(AppContext.BaseDirectory, "overlay", "KikiVRCTan.Overlay.exe");
         if (!File.Exists(overlayExe))
         {
-            Log.Warning("[FORK] KikitanTranslator.Overlay.exe not found in overlay/ next to the app; overlay disabled");
+            Log.Warning("[FORK] KikiVRCTan.Overlay.exe not found in overlay/ next to the app; overlay disabled");
             return;
         }
 

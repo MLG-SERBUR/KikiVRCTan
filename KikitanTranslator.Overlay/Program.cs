@@ -24,7 +24,7 @@ static class Program
     [STAThread]
     static void Main()
     {
-        if (Process.GetProcessesByName("KikitanTranslator.Overlay").Length > 1)
+        if (Process.GetProcessesByName("KikiVRCTan.Overlay").Length > 1)
         {
             Console.WriteLine("Another overlay is running!");
             
