@@ -25,6 +25,12 @@ heap, working set, private bytes) from the same benchmark work.
   (mutex, config dir, logging, first-run language, `AppEngine`
   creation) run from the `App` constructor, since WinUI startup is
   generated. `MainWindow.Closed` disposes the engine.
+- `App.xaml.cs` — `OnLaunched` sets `AppWindow.TitleBar.PreferredTheme`
+  to `UseDefaultAppMode`: the title bar is drawn by DWM, not WinUI, and
+  Windows defaults it to light, so it never follows the app theme on its
+  own. Following the Windows app-mode setting needs no theme-change
+  handler (Win11 only in practice; guarded by
+  `IsCustomizationSupported`).
 - `AppEngine.cs` — pipeline orchestration, mirrors upstream `Photino/Manager`
   (same recognizers/translators/capture, chatbox + OSC outputs, mic fallback
   watcher, overlay process launch). Adds the translation feed as a plain

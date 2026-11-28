@@ -1,5 +1,6 @@
 using System;
 using Microsoft.Extensions.Logging;
+using Microsoft.UI.Windowing;
 using Uno.Resizetizer;
 
 namespace KikitanTranslator.Uno;
@@ -26,6 +27,15 @@ public partial class App : Application
     {
         MainWindow = new Window();
         MainWindow.Closed += (_, _) => Engine?.Dispose();
+
+        // FORK: dark title bar. The title bar is drawn by DWM, not WinUI,
+        // and Windows defaults it to light; it never follows the app theme
+        // on its own (confirmed: microsoft-ui-xaml #9722, and File Explorer
+        // opts in the same way). UseDefaultAppMode makes it follow the
+        // Windows app-mode setting, so no theme-change handler is needed.
+        // Win11 only in practice; the guard covers older Windows.
+        if (AppWindowTitleBar.IsCustomizationSupported())
+            MainWindow.AppWindow?.TitleBar.PreferredTheme = TitleBarTheme.UseDefaultAppMode;
 
         // Do not repeat app initialization when the Window already has content,
         // just ensure that the window is active
